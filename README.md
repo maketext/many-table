@@ -3,7 +3,7 @@ Sheet solution for small businesses
 
 This is an introduction to the many-table under development.
 
-##Login
+## Login
 The login account information is determined during the test phase.
 
 
@@ -15,19 +15,19 @@ The login account information is determined during the test phase.
 ID: admin2
 PW: apple111apple111
 
-##Create Table Sheet
+## Create Table Sheet
 ![image02](https://user-images.githubusercontent.com/32004044/228518265-b226d346-24cf-438e-be0a-fb43ee9657a3.png)
 
 
 [https://plusuniv.com/many-table/new-table](https://plusuniv.com/many-table/login)
 
-##Main
+## Main
 ![image03](https://user-images.githubusercontent.com/32004044/228518321-e6d4f788-f167-4072-8846-151730ad8f1d.png)
 
 
 [https://plusuniv.com/many-table/front](https://plusuniv.com/many-table/login)
 
-##Report
+## Report
 Complete the form directly against the form.
 
 
@@ -36,7 +36,7 @@ Complete the form directly against the form.
 
 [https://plusuniv.com/many-table/report](https://plusuniv.com/many-table/login)
 
-##Approving a report
+## Approving a report
 Sign and select a recipient to send an approval request.
 
 
@@ -45,7 +45,7 @@ Sign and select a recipient to send an approval request.
 
 [https://plusuniv.com/many-table/report](https://plusuniv.com/many-table/report)
 
-##Chart
+## Chart
 ![image06](https://user-images.githubusercontent.com/32004044/228518637-45f9f68e-0c3b-4118-902a-563ffeea834d.png)
 
 
@@ -54,16 +54,16 @@ Using TOAST UI - NHN Cloud Open Source. ([https://ui.toast.com/](https://ui.toas
 
 [https://plusuniv.com/many-table/front](https://plusuniv.com/many-table/front)
 
-##Solution Help
+## Solution Help
 ![image07](https://user-images.githubusercontent.com/32004044/228518695-251255f1-9813-472b-a2e3-9c35a6904c34.png)
 
 
-##License
+## License
 Many Table's License is equal to MIT License.
 Many Table's license applies to all parts of Many Table that are not externally maintained libraries.
 
 Copyright (c) 2022-2023, Many Stallings.
 
-###Externally maintained Libraries
+### Externally maintained Libraries
 
 Node.js, Express.js, LevelDB, Vue.js 2, Buefy CSS Framework, Dayjs, Axios, jQuery, lodash, Toast UI Chart and extra else.

@@ -1,0 +1,12 @@
+@font-face {
+  font-family: 'NS';
+  font-weight: normal;
+	src:url('/fonts/NanumSquareNeoTTF-bRg.woff') format('woff'),
+		url('/fonts/NanumSquareNeoTTF-bRg.eot?#iefix') format('embedded-opentype')
+}
+@font-face {
+  font-family: 'NS';
+  font-weight: bold;
+	src:url('/fonts/NanumSquareNeoTTF-cBd.woff') format('woff'),
+		url('/fonts/NanumSquareNeoTTF-cBd.eot?#iefix') format('embedded-opentype')
+}

@@ -1,0 +1,260 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+ 
+body
+  #app
+    header 
+      // 공통 헤더
+      .tile.h50.bg-gray1
+        .ib.m-auto.ml.mr.left-blank
+          b-image.logo(src="/img/logo.svg")
+        h1.m-tb-auto(style="flex: 0 0 auto;") Many Stallings 매니스탈링스
+        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+        .ib.m-tb-auto.ml
+          a(href="/many-table/front") 메인
+        .ib.m-tb-auto.ml
+          a(href="/many-table/new-table") 테이블 관리
+        .ib.m-tb-auto.ml
+          a(href="/many-table/permission") 권한
+        .ib.m-tb-auto.ml
+          //a(href="/many-table/rowlog") 사용이력
+        .tile
+        //-button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
+          span(style="line-height: 1.7em") 로그아웃
+        //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
+          .tile
+            b-icon.m-tb-auto.mr05(icon="github")
+            span(style="line-height: 1.7em") github
+      // 끝
+      // 고유 헤더
+      .tile.h25
+        .menu-li
+          .ib(style="width:3em;")
+        .menu-li
+          button.flat 권한
+        .menu-li
+          button.flat(@click="fnSaveUser") 저장
+      hr
+      .tile.h25
+        .menu-li
+          .tile
+            .ib(style="width:3em;")
+            .menu-li(v-for="table in Object.keys(meta)")
+              button.flat(@click="tableName = table") {{table}}
+      hr
+      // 끝
+    main
+      //-b-modal(v-model='isAddModalActive', has-modal-card, trap-focus, :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal)
+        template(#default='props')
+          add-modal-form(v-bind='formProps', @close='props.close')
+      .tile
+        .tile.is-vertical(style="flex: 0 0 auto;")
+          section
+            .tile.h25(v-if='isControlTileActive')
+              .menu-li
+                button.flat(@click="fnSetAllowed(true)") 허용
+              .menu-li
+                button.flat(@click="fnSetAllowed(false)") 차단
+            .tile.h25(v-else)
+            p.message-mobile 전체선택시 체크하세요.
+            b-table(:data="user" :td-attrs="(column) => {align: 'right'}" 
+              @check="fnSetControlTileActive"
+              @check-all="fnSetControlTileActive"
+              :checked-rows.sync="checkedList"
+              checkable
+            )
+              template(#bottom-left)
+                b 허용된 계정
+                .ib.w10
+                | {{ fnGetAllowed() }}
+              b-table-column(v-if="column.label != '허용여부'" v-for="(column, index) in columns.meta", :key='index + 1', :label='column.label', :visible='column.visible')
+                template(v-slot="props")
+                  .tile.h25
+                    span.m-auto.ml0 {{props.row[column.field]}}
+              b-table-column(:key='9', label='허용여부')
+                template(v-slot="props")
+                  .tile.h25(v-if="_.isNil(tableName) || tableName == ''")
+                    span.m-auto 테이블 선택 필요
+                  b-select(v-else placeholder='허용여부' v-model="props.row.permission[tableName]")
+                    option(:value='true', key='1') 허용
+                    option(:value='false', key='2') 차단
+
+        div(style="flex: 0 0 1em")
+
+    footer.tile.bg-gray1
+      .ib.desktop(style="width:3em;")
+      .tile
+        .ib.m-auto.fs-content.ml.mr.message-desktop © 2023 Many Stallings.
+        button.footer.flat.mr.ml 보안
+        button.footer.flat.mr 사이트맵
+        button.footer.flat 정책
+        .ib.m-auto.ml.fs-content.message-desktop
+          a(href="/many-table/whatisit") 매니 테이블은 무엇인가요?
+      .tile.desktop
+        .ib.m-auto.fs-content.message-desktop.
+          This site is powered by...
+
+    
+
+script(type="text/javascript").
+  const AddModalForm = {
+      data: {name: ''},
+      props: ['this_'],
+      methods: {
+      },
+      template: `
+          <form action="">
+              <div class="modal-card" style="">
+                  <header class="modal-card-head">
+                    <p class="modal-card-title">테이블 추가</p>
+                    <button
+                        type="button"
+                        class="delete"
+                        @click="$emit('close')"/>
+                  </header>
+                  <section class="modal-card-body">
+                    <b-input v-model="name" placeholder="테이블명"/>
+                  </section>
+                  <footer class="modal-card-foot" style="padding-bottom:2px">
+                    <div class="tile"></div>
+                    <b-button
+                        @click="this_.fnAddTableMeta(name)"
+                        label="추가" />
+                  </footer>
+              </div>
+          </form>
+      `,
+      created() {
+        
+      }
+  }
+
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        isControlTileActive: false,
+        checkedList: [],
+        message: '',
+        tableName: '',
+        user: [],
+        meta: {},
+        columns:{meta: [
+          {field: 'username', label: '아이디', type: '메타', visible: true},
+          {field: 'name', label: '이름', type: '메타', visible: true},
+          {field: 'permission', label: '허용여부', type: '메타', visible: true},
+        ]}
+      },
+      methods: {
+        fnSetAllowed: function(value) {
+          if(_.isNil(this.tableName)) return
+          for(const e of this.checkedList)
+          {
+            e.permission[this.tableName] = value
+            e.permission = _.cloneDeep(e.permission)
+          }
+        },
+        fnGetAllowed: function() {
+          if(_.isNil(this.tableName)) return ''
+          return this.user.map(e => {
+            if(e.permission[this.tableName] == true)
+              return e.name
+            return undefined
+          }).filter(e => e !== undefined).join(', ')
+        },
+        fnSetControlTileActive: function(arr, row) {
+          if(arr.length == 0) this.isControlTileActive = false
+          else this.isControlTileActive = true
+        },
+        fnReadTableMeta: function() {
+          const thisVar =  this
+          http({uri:"/api/v2/table-list/", method:"patch", param: {}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+            {
+              thisVar.message = '로딩됨'
+              thisVar.meta = res.result.columns ? res.result.columns : {}
+              console.log('table list', res.result)
+            }
+            else 
+            {
+              thisVar.message = '오류'
+            }
+            
+          }})
+        },
+        fnReadUser: function() {
+          const thisVar =  this
+          http({uri:"/api/v2/user-list/", method:"patch", param: {}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+            {
+              thisVar.message = '로딩됨'
+              thisVar.user = _.values(res.result.user)
+            }
+            else 
+            {
+              thisVar.message = '오류'
+            }
+            
+          }})
+
+        },
+        fnSaveUser: function() {
+          const userObj = {} 
+          this.user.forEach(e => userObj[e.username] = e)
+          http({uri:"/api/v2/user-list/", method:"post", param: {user: userObj}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+            {
+              this.message = '저장됨'
+            }
+            else 
+            {
+              this.message = '오류'
+            }
+
+          }})
+        }
+      },
+      computed: {
+      },
+      created()
+      {
+        this.fnReadTableMeta()
+        this.fnReadUser()
+      },
+      mounted()
+      {
+      }
+  })
+
+
+
+
+
+
+
+
+
+

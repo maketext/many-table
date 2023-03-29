@@ -1,0 +1,30 @@
+{
+  "name": "deep01",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.17.3",
+    "multer": "^1.4.5-lts.1",
+    "compression": "^1.7.4",
+    "axios": "^1.2.3",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "level": "^8.0.0",
+    "flash": "^1.1.0",
+    "lodash": "^4.17.21",
+    "randomstring": "^1.2.3",
+    "path": "^0.12.7",
+    "pug": "^2.0.4",
+    "dayjs": "^1.10.4",
+    
+    "mobile-detect": "^1.4.5"
+  },
+  "description": "test",
+  "main": "main.js",
+  "author": "Chang Ho Lee",
+  "license": "MIT",
+  "devDependencies": {}
+}

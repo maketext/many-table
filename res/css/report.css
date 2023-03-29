@@ -1,0 +1,65 @@
+/* 공통 */
+html {
+  font-size: small;
+}
+table.sign input, table.report input, table.report2 input, #report-staff input {
+  background: #EDEED3;
+  font-size: 1em;
+  height: 1.3em;
+  margin-top: 1px;
+  padding: 0;
+}
+table.sign input::placeholder, table.report input::placeholder, table.report2 input::placeholder, #report-staff input::placeholder {
+  color: #B7A000;
+}
+table.sign + .control textarea, table.report + .control textarea, table.report2 + .control textarea {
+  background: #EDEED3;
+}
+table.sign + .control textarea::placeholder, table.report + .control textarea::placeholder, table.report2 + .control textarea::placeholder {
+  color: #B7A000;
+}
+#svg-res {
+  display: inline-block;
+  width: 596px;
+  height: 842px;
+}
+
+/*거래명세표 001*/
+table.report colgroup.colgroup001 col:nth-child(1) {
+  width: 34.5%;
+}
+table.report colgroup.colgroup001 col:nth-child(2) {
+  width: 3.5%;
+}
+table.report colgroup.colgroup001 col:nth-child(3) {
+  width: 10.5%;
+}
+table.report colgroup.colgroup001 col:nth-child(4) {
+  width: 20.5%;
+}
+table.report colgroup.colgroup001 col:nth-child(5) {
+  width: 8%;
+}
+table.report colgroup.colgroup001 col:nth-child(6) {
+  width: 23%;
+}
+table.report2 colgroup.colgroup001 col:nth-child(n) {
+  width: calc(100% / 34);
+}
+
+h1 {
+  font-size: 1.5em;
+}
+
+.fieldFrom {
+  justify-content: space-between;
+}
+
+/*근로계약서 003*/
+.staff .input {
+  display: inline-flex;
+  width: unset;
+}
+.staff.sm .input {
+  width: 4.3em;
+}

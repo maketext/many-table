@@ -1,0 +1,158 @@
+doctype html
+html.h100
+  head
+    meta(charset='utf-8')
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+
+body.h100
+  #app.h100
+    header(stlye="height: 0;")
+    main.tile.h100
+      ib.m-l-auto.m-tb-auto.mr(style="width: 500px;height:500px;")
+        .tile.is-vertical.box.is-vertical.hin
+          .ib.m-lr-auto
+            .h10
+            .tile
+              h1.m-auto(style="font-size: 2em;") 
+                span 계정
+                br
+                span 서비스 약관에 동의해 주세요.
+            .h10
+            .h10
+            b-checkbox(v-model="radioAllAgree" type="is-warning")
+              b 모두 동의합니다.
+            p.color-gray 모두 동의할 경우 모든 필수항목에 대한 동의를 하게 됩니다. 선택항목은 개별적으로 선택해야합니다.
+            .h10
+            b-checkbox(v-model="radioAllAgree" type="is-warning")
+              .mr.color-gray 필수
+              b 만 14세 이상입니다.
+            .tile
+              b-checkbox(v-model="radioAllAgree" type="is-warning")
+                .mr.color-gray 필수
+                b 개인정보 처리방침에 동의합니다.
+              button.blue.m-tb-auto(type="submit" style="flex: 1;")
+                .tile
+                  .m-auto(style="line-height: 1.7em") 개인정보 처리방침 보기
+
+          .h10
+          //-button.blue.m-tb-auto(type="submit" style="flex: 0 0 3em;")
+            .tile
+              .m-auto(style="line-height: 1.7em") 동의
+
+            .tile.is-vertical
+              .tile.h50
+      ib.m-r-auto.m-tb-auto(style="width: 500px;height:500px;")
+        .tile.is-vertical.box.is-vertical.hin
+          b-field(label='아이디', :type="field.idType", :message="field.idMessage")
+            b-input(v-model="requestUser.id", @input="fnValid('아이디')" maxlength='50')
+          b-field(label='비밀번호', :type="field.pwType", :message="field.pwMessage")
+            b-input(v-model="requestUser.pw", @input="fnValid('비밀번호')" type='password', maxlength='50')
+          .tile(style="flex: 1;")
+          button.blue(type="submit" style="flex: 0 0 3em;")
+            .tile
+              .m-auto(style="line-height: 1.7em") 가입요청
+          div(style="height: 6px;")
+          .h10
+          .h10              
+
+    footer.tile.bg-gray1
+      .ib(style="width:3em;")
+      .tile.m-auto
+        button.flat.ml.mr 회원가입
+
+    
+
+script(type="text/javascript").
+  let failLoginMessage = "#{message}"
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        radioAllAgree: null,
+        requestUser: {
+          id: '',
+          pw: ''
+        },
+        field: {
+          idType: '',
+          pwType: '',
+          idMessage: '',
+          pwMessage: ''
+        }
+      },
+      methods: {
+      },
+      computed: {
+        fnValid: function() {
+          function between(a, b, c)
+          {
+            return a <= b && b <= c
+          }
+          return (cmd) => {
+            console.log("ddd")
+            switch(cmd)
+            {
+              case '아이디':
+              {
+                if(between(3, this.requestUser.id.length, 20)) // 아이디 규칙 조건
+                {
+                  this.field.idType = 'is-success'
+                  this.field.idMessage = '아이디 규칙을 충족합니다.'
+                }
+                else if(this.requestUser.id.length > 20) // 아이디 규칙 위반
+                {
+                  this.field.idType = 'is-danger'
+                  this.field.idMessage = '20자 이하여야 합니다.'
+                }
+                break
+              }
+              case '비밀번호':
+              {
+                if(between(3, this.requestUser.pw.length, 20)) // 비밀번호 규칙 조건
+                {
+                  this.field.pwType = 'is-success'
+                  this.field.pwMessage = '비밀번호 규칙을 충족합니다.'
+                }
+                else if(this.requestUser.pw.length > 20) // 비밀번호 규칙 위반
+                {
+                  this.field.pwType = 'is-danger'
+                  this.field.pwMessage = '20자 이하여야 합니다.'
+                }
+                break
+              }
+            }
+          }
+        }
+      },
+      created()
+      {
+      },
+      mounted()
+      {
+      }
+  })
+
+
+
+
+
+
+
+
+
+

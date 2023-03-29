@@ -1,0 +1,360 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+ 
+body
+  #app
+    header
+      // 공통 헤더
+      .tile.h50.bg-gray1
+        .ib.m-auto.ml.mr.left-blank
+          b-image.logo(src="/img/logo.svg")
+        h1.m-tb-auto(style="flex: 0 0 auto;") Many Stallings 매니스탈링스
+        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+        .ib.m-tb-auto.ml
+          a(href="/many-table/front") 메인
+        .ib.m-tb-auto.ml
+          a(href="/many-table/new-table") 테이블 관리
+        .ib.m-tb-auto.ml
+          a(href="/many-table/permission") 권한
+        .ib.m-tb-auto.ml
+          //a(href="/many-table/rowlog") 사용이력
+        .tile
+        //-button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
+          span(style="line-height: 1.7em") 로그아웃
+        //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
+          .tile
+            b-icon.m-tb-auto.mr05(icon="github")
+            span(style="line-height: 1.7em") github
+      // 끝
+      // 고유 헤더
+      .tile.h25
+        .menu-li
+          .ib(style="width:3em;")
+        .menu-li(v-for="table in Object.keys(meta)")
+          button.flat.noborder(@click="fnShowTableMeta(table)") {{table}}
+        .menu-li
+          button.flat(@click="fnShowAddModal()") 테이블 추가
+      hr
+      .tile.h25
+        .menu-li 
+          .tile
+            .ib(style="width:3em;")
+            b-icon.m-tb-auto.mr05(icon="face-man-profile")
+            span.m-tb-auto.fs-content {{message}}
+      hr
+      // 끝
+
+    main
+      b-modal(v-model='isAddModalActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          add-modal-form(v-bind='formProps', @close='props.close')
+      section(style="width: 600px;")
+        b-table(:data="meta[tableName]" :td-attrs="(column) => {align: 'right'}"
+          draggable
+          draggable-column
+          @dragstart="dragstart"
+          @drop="drop"
+          @dragover="dragover"
+          @dragleave="dragleave"
+        )
+          b-table-column(key='0', width="1")
+            template(v-slot="props")
+              .tile(style="height:39px;")
+                b-icon.m-auto(icon='drag', size='is-medium', type='is-primary')
+          b-table-column(key='0', width="1")
+            template(v-slot="props")
+              button(@click="fnDeleteTableColumn(props, props.row)")
+                b-icon(icon='close-box-outline', size='is-medium', type='is-primary')
+          b-table-column(v-for="(column, index) in columns['meta']", :key='index + 1', :label='column.label', :visible='column.visible')
+            template(v-slot="props")
+              b-select(v-if="column.field == 'visible'" placeholder='표시 여부' v-model="props.row[column.field]")
+                option(:value='true', key='1') 예
+                option(:value='false', key='2') 아니오
+              b-select(v-else-if="column.field == 'type'" placeholder='타입' v-model="props.row[column.field]")
+                option(v-for="(value, i) in typeList" :value='value', key='i') {{value}}
+              b-input(v-else-if="column.field == 'label' && Array.isArray(props.row[column.field])" v-model="props.row[column.field][0]") 
+              b-input(v-else-if="column.field == 'label'" v-model="props.row[column.field]")
+              b-input(v-else-if="column.field == 'func' && props.row['type'] == '수식'" v-model="props.row[column.field]")
+        .tile.h-center.h25
+          .ib
+            button.mr.ml(@click="fnAddTableColumn()") 열 추가
+            button.mr(@click="fnSaveTableMeta()") 저장
+            button(@click="fnDeleteTableMeta()") 테이블 삭제
+    footer.tile.bg-gray1
+      .ib.desktop(style="width:3em;")
+      .tile
+        .ib.m-auto.fs-content.ml.mr.message-desktop © 2023 Many Stallings.
+        button.footer.flat.mr.ml 보안
+        button.footer.flat.mr 사이트맵
+        button.footer.flat 정책
+        .ib.m-auto.ml.fs-content.message-desktop
+          a(href="/many-table/whatisit") 매니 테이블은 무엇인가요?
+      .tile.desktop
+        .ib.m-auto.fs-content.message-desktop.
+          This site is powered by...
+
+    
+
+script(type="text/javascript").
+  let remoteNode = "#{remoteNode}"
+  function deleteElementById(arr, id) {
+    return arr.filter(e => e.id !== id)
+  }
+  function copyObject(from, to) {
+    for(param in from)
+      to[param] = from[param]
+  }
+
+  const AddModalForm = {
+      data: {name: ''},
+      props: ['this_'],
+      methods: {
+      },
+      template: `
+        <div class="modal-card" style="">
+            <header class="modal-card-head">
+              <p class="modal-card-title">테이블 추가</p>
+              <button
+                  type="button"
+                  class="delete"
+                  @click="$emit('close')"/>
+            </header>
+            <section class="modal-card-body">
+              <b-input v-model="name" placeholder="테이블명"/>
+            </section>
+            <footer class="modal-card-foot" style="padding-bottom:2px">
+              <div class="tile"></div>
+              <b-button
+                  @click="this_.fnAddTableMeta(name)"
+                  label="추가" />
+            </footer>
+        </div>
+      `,
+      created() {
+        
+      }
+  }
+
+  let v = new Vue({
+      el: '#app',
+      components: {
+        AddModalForm
+      },
+      data: {
+        isAddModalActive: false,
+        formProps: null,
+        tableName: null,
+        meta: {},
+        name: '',
+        message: '',
+        typeList: ['일반', '실수', '정수', '날짜', '링크', '체크박스', '멀티라인', '스타', '첨부파일', '수식', '다중값필드'],
+        columns:{meta: [
+          {field: 'field', label: 'Field', type: '메타', visible: false},
+          {field: 'label', label: '필드명', type: '메타', visible: true},
+          {field: 'type', label: '타입', type: '메타', visible: true},
+          {field: 'func', label: '수식', type: '메타', visible: true},
+          {field: 'visible', label: '표시여부', type: '메타', visible: true},
+        ]},
+        draggingRowIndex: undefined,
+        draggingRow: undefined
+      },
+      methods: {
+        dragstart(payload) {
+          this.draggingRow = payload.row
+          this.draggingRowIndex = payload.index
+          payload.event.dataTransfer.effectAllowed = 'copy'
+        },
+        dragover(payload) {
+          payload.event.dataTransfer.dropEffect = 'copy'
+          payload.event.target.closest('tr').classList.add('is-selected')
+          payload.event.preventDefault()
+        },
+        dragleave(payload) {
+          payload.event.target.closest('tr').classList.remove('is-selected')
+          payload.event.preventDefault()
+        },
+        drop(payload) {
+          payload.event.target.closest('tr').classList.remove('is-selected')
+          const droppedOnRowIndex = payload.index
+          const fromIndex = this.draggingRowIndex
+          const toIndex = droppedOnRowIndex
+          const rowFrom = this.draggingRow
+          this.meta[this.tableName].splice(fromIndex, 1)
+          this.meta[this.tableName].splice(toIndex, 0,rowFrom)
+
+          //this.$buefy.toast.open(`Moved ${this.draggingRow.first_name} from row ${} to ${}`)
+        },
+        fnFunc: function(row, column) {
+          //row[column.field] = '컬럼1+컬럼2' // 타입값
+          //this.$forceUpdate()
+
+          /*
+            field: (...)
+            func: "컬럼1+컬럼2"
+            label: (...)
+            type: "수식"
+            visible: (...) 
+          */
+        },
+        fnReadTableMeta: function() {
+          const thisVar =  this
+          http({uri:"/api/v2/table-list/", method:"patch", param: {}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+            {
+              thisVar.message = '로딩됨'
+              
+              for(const column in res.result.columns)
+                res.result.columns[column] = res.result.columns[column].map(row => {
+                  row.field = Array.isArray(row.field) ? row.field[0] : row.field
+                  row.label = [row.label]
+                  return row
+                })
+              thisVar.meta = res.result.columns ? res.result.columns : {}
+            }
+            else
+            {
+              thisVar.message = '오류'
+            }
+            
+          }})
+
+        },
+        fnShowTableMeta: function(tableName) {
+          this.tableName = tableName
+        },
+        fnShowAddModal: function() {
+          this.formProps = {this_: this}
+          this.isAddModalActive = true
+        },
+        fnAddTableMeta: function(name) {
+          if(name == '' || _.isNil(name))
+          {
+            this.message = "에러: 테이블명을 입력하세요."
+            return
+          }
+          if(Object.keys(this.meta).filter(e => e === name).length > 0)
+          {
+            this.message = "에러: 테이블명 중복"
+            return
+          }
+
+          this.meta[name] = []
+          this.meta = _.cloneDeep(this.meta)
+          this.message = "테이블 추가됨"
+        },
+        fnAddTableColumn: function() {
+          function makeEmptyColumnOne() {
+            let obj = {}
+            for(let field of this.columns.meta)
+            {
+              if(field.label == '타입') obj[field.field] = '일반'
+              else obj[field.field] = ''
+            }
+              
+            obj.visible = true
+            return obj
+          }
+          if(_.isNil(this.tableName)) 
+          {
+            this.message = "테이블을 선택하세요."
+            return
+          }
+          if(_.isNil(this.meta[this.tableName]) || this.meta[this.tableName].length == 0)
+            this.meta[this.tableName] = [makeEmptyColumnOne.bind(this)()]
+          else 
+            this.meta[this.tableName] = [...this.meta[this.tableName], makeEmptyColumnOne.bind(this)()]
+        },
+        fnDeleteTableColumn: function(props) {
+          this.meta[this.tableName] = this.meta[this.tableName].filter(e => e !== props.row)
+        },
+        fnDeleteTableMeta: function() {
+          if(_.isNil(this.tableName)) 
+          {
+            this.message = "테이블을 선택하세요."
+            return
+          }
+          delete this.meta[this.tableName]
+          this.tableName = ''
+          this.fnSaveTableMeta('테이블삭제됨')
+        },
+        fnSaveTableMeta: function(tag) {
+          if(tag != '테이블삭제됨')
+          {
+            if(_.isNil(this.tableName) || this.tableName == '')
+            {
+              this.message = "에러: 테이블을 선택하세요."
+              return
+            }
+            if(this.meta[this.tableName].length == 0)
+            {
+              this.message = "에러: 열 항목이 비었음"
+              return
+            }
+            for(let field of this.meta[this.tableName])
+              field.field = _.isNil(field.field) || field.field === '' ? field.label : field.field
+          }
+          for(const column in this.meta)
+            this.meta[column] = this.meta[column].map(row => {
+              if(Array.isArray(row.field)) row.field = row.field[0]
+              if(Array.isArray(row.label)) row.label = row.label[0]
+              row.field = row.label
+              return row
+            })
+          console.log(this.meta)
+
+          http({uri:"/api/v2/table-list/", method:"post", param: {columns: this.meta}, cb: (res) => {
+            //res = {code, msg, result}
+            console.log(res)
+            if(res.code == 0)
+            {
+              this.message = '저장됨'
+            }
+            else 
+            {
+              this.message = '오류'
+            }
+
+          }})
+        }
+      },
+      computed: {
+      },
+      created()
+      {
+        this.fnReadTableMeta()
+      },
+      mounted()
+      {
+      }
+  })
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,302 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/dayjs.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src='/js/crud.js')
+    script(type='text/javascript', src="/js/lodash.js")
+    script(type='text/javascript', src="/js/jspdf-2-5-0.js")
+    script(type='text/javascript', src='/js/dom-to-image.js')
+    //script(type='text/javascript', src='/js/toastui-chart.min.js')
+    script(type='text/javascript', src='/js/jquery-3-6-3.js')
+    script(type='text/javascript', src="/js/modal.js")
+    script(type='text/javascript', src="/js/event-bus.js")
+    
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/report.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+    //link(rel='stylesheet', href='/css/toastui-chart.min.css')
+    
+
+    title 매니테이블 - 보고서
+    style.
+      table {
+        margin: 1em 0.5em -3px 0.5em;
+        border: 3px solid #0076CD;
+      }
+      table td, th {
+        padding: 0.3rem;
+        border : 1px solid #0076CD;
+        border-collapse : collapse;
+      }
+      table.report2 {
+        margin-top: 0;
+      }
+      table td, table th {
+        vertical-align: middle;
+      }
+      .m1 {
+          display: inline-block;
+          width: calc(2em);
+      }
+      .m2 {
+          display: inline-block;
+          width: calc(1em / 2);
+      }
+      .flex {
+          display: flex;
+          flex-direction: column;
+      }
+      .signarea {
+          margin:auto;
+          font-size: 0.5em;
+      }
+
+body
+  #app
+    main.p0.front
+      .tile.is-vertical
+        .tile.p
+          .ib.m-auto.logo-place.ml
+            b-image.logo(src="/img/logo.svg")
+          .tile.is-vertical
+            .tile.ml.p-lr.title-area
+              b-select(placeholder='양식 선택', icon='earth' @input='fnChangeTableName' v-model="tableName")
+                option(:value='columnKey' v-for="columnKey in Object.keys(columns)") {{columnKey}}
+              span.ml05.m-tb-auto 양식 작성
+            .bg-help.ml.p-lr
+              h2(:style="msgCSS") {{msg}}
+
+      .tile.pt
+        .tile.is-vertical
+          .tile.h100.menu-report.preview
+            report-instance-001(v-if="tableName === '거래명세표'" :this_='this' @ddd="fnDDD" :find="find")
+            report-instance-002(v-else-if="tableName === '견적서'" :this_='this')
+            report-instance-003(v-else-if="tableName === '근로계약서'" :this_='this')
+
+          #svg-res
+    b-modal(v-model='isShowModalFindActive', has-modal-card, trap-focus, :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+      template(#default='props')
+        modal-find-form(v-bind='formProps', @close='props.close();sendToForm();')
+  include report/001.pug
+  include report/002.pug
+  include report/003.pug
+      
+
+script(type="text/javascript").
+  window.jsPDF = window.jspdf.jsPDF
+  const pdf = new jsPDF("p", "px", [596, 842])
+
+  const currentUser = {}
+  currentUser.username = "#{username}"
+  currentUser.name = "#{name}"
+  const tableNameListGlobal = JSON.parse(decodeURIComponent(escape(atob("#{tableName}"))))
+
+  console.log(tableNameListGlobal)
+  function len(str)
+  {
+      if(str == undefined) return 0
+      if(str == null) return 0
+      if(str.hasOwnProperty('length')) return str.length
+      return 0
+  }
+  Array.prototype.isLast = function(obj) {
+      if(this[this.length - 1] === obj) return true 
+      return false
+  }
+
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        isShowModalFindActive: false,
+        isAddActive: false,
+        widthOfTableCell: undefined,
+
+        functionName: '',
+        msg: '',
+        msgColor: 'black',
+        msgBackground: 'white',
+        currentPage: 1,
+        formProps: {},
+
+
+        name: currentUser.name,
+        tableName: tableNameListGlobal[0],
+        columns: [],
+        add: {},
+        select: {}
+      },
+      methods: {
+
+        fnDDD: function() {
+          crud.fnFind('isShowModalFindActive')
+        },
+        sendToForm: function () {
+          EventBus.$emit('message', this.select[this.tableName])
+        },
+        // 공통
+        fnChangeTableName: function(value) {
+          this.tableName = value
+          setTimeout(() => {
+          }, 100)
+        },
+        makeOneDummyRow: function(id, tableName) {
+          let row = {}
+          if(_.isNil(tableName)) tableName = this.tableName
+          if(!Array.isArray(this.columns[tableName])) return undefined
+          for(field of this.columns[tableName])
+            row[field.field] = ''
+          if(id)
+            row.id = id
+          delete row.null
+          return row
+        },
+        fnAdd: function () {
+          this.isAddActive = true
+          crud.fnAdd('isAddActive')
+          this.msg = `양식이 ${this.tableName} 테이블에 저장되었습니다. 메인에서 테이블을 열어보십시오.`
+        },
+        fnFind: function () {
+          crud.fnFind('isShowModalFindActive')
+
+        },
+
+        // 공통 끝
+
+        // SVG 파일 익스포트
+        fnExportSvg: function () {
+          alert('기능을 막아 두었습니다.')
+          return
+          const node = document.getElementById('report')
+          domtoimage.toSvg(node)
+            .then(function (dataUrl) {
+              const img = new Image()
+              img.src = dataUrl
+              document.getElementById('svg-res').appendChild(img)
+            })
+            .catch(function (error) {
+              console.error('oops, something went wrong!', error);
+            })
+        },
+        fnExportPdf: function () {
+          const thisVar = this
+          this.msg = '양식 영역을 일시적으로 확대 중입니다.'
+          $('#report').css('width', '1587px').css('height', '2243px').css('font-size', '2em')
+          $('#report input').css('font-size', '2em').css('background', 'none').css('border', 'none').css('box-shadow', 'none')
+          $('#report button').css('display', 'none')
+          const node = document.querySelector('#report')
+
+          domtoimage.toJpeg(node, {quality: 1.0})
+            .then(function (dataUrl) {
+              $('#report').css('width', '21cm').css('height', '29.7cm').css('font-size', '1em')
+              $('#report input').css('font-size', '1em').css('background', '#EDEED3').css('border', '1px solid dbdbdb').css('box-shadow', 'inset 0 0.0625em 0.125em rgb(10 10 10 / 5%)')
+              $('#report button').css('display', 'inline-block')
+
+              let img = new Image()
+              img.src = dataUrl
+              const parentNode = document.querySelector('#svg-res')
+              parentNode.appendChild(img)
+              let width = pdf.internal.pageSize.getWidth()
+              let height = pdf.internal.pageSize.getHeight()
+
+              pdf.addImage(document.querySelector('#svg-res img'), 'JPEG', 0, 0, width, height, '', 'NONE')
+              pdf.save('myPDF.pdf')
+              thisVar.msg = '생성된 PDF가 다운로드 되었습니다.'
+              parentNode.removeChild(img)
+            })
+            .catch(function (error) {
+              console.error('oops, something went wrong!', error);
+            })
+        },
+        fnSetTableName: function() {
+          http({uri:"/api/v2/env", method:"post", param: {'직원명부': this.tableName}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+              this.msg = '결제, 서명에 사용할 직원 테이블 변경 완료.'
+            window.location.reload(true)
+          } })
+
+        },
+        fnSelectHuman: function(e) {
+          this.msg = '수신자를 선택했습니다.'
+          this.msgColor = 'red'
+          this.msgBackground = '#fdd'
+          console.log(e)
+          this.signRequestTo = e
+        }
+      },
+      computed: {
+      },
+      created()
+      {
+        crud.set(this)
+        // 직원리스트 테이블 컬럼 메타 정보 획득
+      },
+      mounted()
+      {
+        if(_.isNil(tableNameListGlobal) || tableNameListGlobal == '')
+        {
+          this.msg = '보고서 전용 테이블 리스트가 없습니다. 새로고침 해도 해결되지 않을 경우 개발사에 문의하세요.'
+          return
+        }
+        http({uri:"/api/v2/table-list", method:"patch", param: {tableName: tableNameListGlobal}, cb: (res) => {
+          //res = {code, msg, result}
+          console.log("HTTP 응답", res)
+          if(res.code == 0)
+          {
+            this.columns = _.cloneDeep(res.result.columns)
+            this.msg = '정상적으로 로딩되었습니다.'
+
+            // 리터럴 생성용
+            tableNameListGlobal.forEach(e => {
+              this.add[e] = [{}]
+              for(const column of this.columns[e])
+                this.add[e][0][column.field] = ''
+            }, this)
+
+
+          }
+        }})
+
+
+        // 문서번호 자동생성 요청
+        /*
+        http({uri:"/api/v2/document-no", method:"patch", param: {}, cb: (res) => {
+          //res = {code, msg, result}
+          console.log("HTTP 응답", res)
+          if(res.code == 0)
+            this.doc['문서번호'] = res.no
+        } })*/
+
+      },
+      computed: {
+        isClickedFunctionalButtonCSS: function() {
+          return (name) => {
+            if(this.functionName !== name) return {}
+            return {background: '#fff', color: '#222'}
+          }
+        },
+        msgCSS: function() {
+          return {color: this.msgColor, background: this.msgBackground}
+        }
+      }
+  })
+
+
+
+
+
+
+
+
+
+

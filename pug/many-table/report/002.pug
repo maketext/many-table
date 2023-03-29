@@ -1,0 +1,138 @@
+script(type="text/x-template" id="report-002")
+  #report.p-report.ib(style="width: 21cm;height: 29.7cm;background: white;font-size: 12px;" ref='printarea')
+    .tile.is-vertical
+      .tile(style="flex: 0 1 15em;")
+        h1.m-auto {{title}}
+      .tile(style="justify-content: space-between")
+        .tile
+          span.mr {{dataA[0].field}}
+          span {{dataA[0].value}}
+        .tile
+          span.mr {{dataA[1].field}}
+          span {{dataA[1].value}}
+        .tile
+          span.mr {{dataA[2].field}}
+          span {{dataA[2].value}} 까지
+      .tile.mt
+        .tile.is-3
+        .tile.is-1.mr
+          img(src="/img/logo.svg" style="height: 6em;margin-left:auto;margin-right: 1em;")
+        .tile.is-8.is-vertical
+          .tile
+            .tile.is-3.fieldFrom.mr
+              span 등
+              span 록
+              span 번
+              span 호
+            .tile.is-vertical.
+              776-47-00247
+          .tile
+            .tile.is-3.fieldFrom.mr
+              span 상
+              span 호
+            .tile.is-vertical.
+              매니스탈링스
+          .tile
+            .tile.is-3.fieldFrom.mr
+              span 주
+              span 소
+            .tile.is-vertical
+              p {{address.split(',')[0]}},
+              p {{address.split(',')[1]}}
+      .tile.mt
+        p(style="margin-left:auto;") {{dataB[0].field}} {{dataB[0].value}} / {{dataB[1].field}} {{dataB[1].value}} / {{dataB[2].field}} {{dataB[2].value}}
+      table.quo.m0.mt(border="1")
+        tbody
+          tr(v-for="index in [0, 1, 2]")
+            td {{dataC[index].field}}
+            td {{dataC[index].value}}
+            td {{dataC[index+3].field}}
+            td {{dataC[index+3].value}}
+      h6.mt5 {{headerMessage.join(' : ')}}
+      table.quo.m0.mt(border="1")
+        thead 
+          tr 
+            th 순번
+            th(v-for="data in dataD") {{data.field}}
+
+        tbody
+          tr(v-for="(row, no) in items")
+            td {{no+1}}
+            td(v-for="data in row" style="") {{data.value == 0 ? '' : data.value}}
+          tr
+            td 합계
+            td(v-for="data in summary" style="") {{data.value}}
+          tr
+            td(colspan="8")
+              div(v-for="(row, no) in printFooterMessage(0)")
+                span {{no+1}}.
+                span {{'     '}}
+                span {{row.msg}}
+              div(v-for="(row, no) in printFooterMessage(1)")
+                span {{printFooterMessage(0).length + no+1}}.
+                span {{'     '}}
+                span {{row.msg}}
+      p.mt(style="text-align:center;") --- 이하 여백 ---
+
+script.
+  Vue.component('reportInstance002', {
+    template: '#report-002',
+    props: ['this_'],
+    data() {
+      return {
+        add: {},
+        title: '견적서 QUOTATION',
+        img: '',
+        address: '경기도 안양시 동안구 평촌대로 239, (신안메트로칸) 731호 매니스탈링스',
+        headerMessage: ['견 적 명', '머신비전 카메라와 거치세트 및 딥러닝 소프트웨어'],
+        footerMessage: [{msg: '요청하신 견적서를 송부드립니다.', option: ''}, {msg: '화폐단위는 대한민국의 화폐단위로 \'원\' (WON) 입니다.', option: ''}],
+        dataA: [
+          {field: '견적번호', value: ' MSS-2023-02-01-1', option: ''}, 
+          {field: '견적일자', value: '2023.02.01', option: ''},
+          {field: '유효기간', value: '2023.03.01', option: ''},
+        ],
+        dataB: [
+          {field: '발 신', value: '이창호', option: ''}, 
+          {field: '전화번호', value: '010-5535-3904', option: ''}, 
+          {field: '이메일', value: 'maketext@manystallings.com', option: ''}, 
+        ],
+        dataC: [
+          {field: '수 신', value: '주식회사 프로세서공장', option: ''}, 
+          {field: '담당자', value: '브라운', option: ''},
+          {field: '전화번호', value: '', option: ''},
+          {field: '이메일', value: '', option: ''},
+          {field: '지불조건', value: '공란', option: ''},
+          {field: '납 기', value: '발주 후 6주', option: ''},
+        ],
+        dataD: [
+          {field: '품목', value: '', option: ''}, 
+          {field: '규격', value: '', option: ''},
+          {field: '수량', value: '1', option: ''},
+          {field: '단위', value: 'Set', option: ''},
+          {field: '단가', value: '', option: '천단위구분쉼표'},
+          {field: '부가세', value: '160000', option: '천단위구분쉼표'},
+          {field: '금액', value: '1760000', option: '천단위구분쉼표'},
+        ],
+        summary: [
+          {field: '품목', value: '', option: ''}, 
+          {field: '규격', value: '', option: ''},
+          {field: '수량', value: '', option: ''},
+          {field: '단위', value: '', option: ''},
+          {field: '단가', value: '', option: '천단위구분쉼표'},
+          {field: '부가세', value: '', option: '천단위구분쉼표'},
+          {field: '금액', value: '', option: '천단위구분쉼표'},
+        ],
+        items: [],
+       
+      }
+    },
+    methods: {
+      printFooterMessage: function (divBy) {
+        return this.footerMessage.filter((e, index, arr) => { return e.option !== false && index % 2 == divBy} )
+      },      
+    },
+    mounted()
+    {
+      this.add = this.this_.add[this.this_.tableName][0]
+    }
+  })

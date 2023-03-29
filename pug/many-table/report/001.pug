@@ -1,0 +1,220 @@
+script(type="text/x-template" id="report-001")
+  .tile.is-vertical
+    .tile.menu-report
+      button.blue(@click="fnAdd()") 작성 내용을 추가
+      button.blue(@click="fnFind()") 로드
+      button.blue(@click="fnExportPdf()") PDF로 출력
+      button.blue(@click="fnExportSvg()") SVG로 출력
+    .tile
+      #report(style="display:inline-flex;width: 21cm;height:29.7cm;background: white;" ref='printarea')
+        .ib.m-auto(style="width: 90%;")
+          table.report
+            colgroup.colgroup001
+              col
+              col
+              col
+              col
+              col
+              col
+            tbody
+              tr
+                td.pl(rowspan="2" colspan="4")
+                  h1.ib.mr 거 래 명 세 표
+                  span (공급받는자 보관용)
+                td.ctr 일자
+                td
+                  b-input(v-model="add[0]['일자']")
+              tr
+                td.ctr No.
+                td
+                  b-input(v-model="add[0]['No']")
+
+              tr
+                td.ctr
+                  .tile
+                    .tile
+                      b-input(v-model="add[0]['수신인']")
+                    span.ml 귀하
+
+                td.ctr(rowspan="5")
+                  span 공
+                  div(style="height:calc(1.6em);")
+                  span 급
+                  div(style="height:calc(1.6em);")
+                  span 자
+                td
+                  .tile.sb
+                    span 등
+                    span 록
+                    span 번
+                    span 호
+                td.ctr(colspan="3")
+                  b-input(v-model="add[0]['사업자등록번호']")
+              tr
+                td.ctr(rowspan="4") 아래와 같이 계산합니다.
+                td.ctr
+                  .tile.sb
+                    span 상
+                    span 호
+                  .tile.sb
+                    span (
+                    span 법인명
+                    span )
+                td.ctr
+                  b-input(v-model="add[0]['상호']")
+                td.ctr
+                  .tile.sb
+                    span 성
+                    span 명
+                td.ctr
+                  b-input(v-model="add[0]['성명']")
+              tr
+                td
+                  .tile.sb
+                    span 사
+                    span 업
+                    span 장
+                  .tile.sb
+                    span 소
+                    span 재
+                    span 지
+                td.ctr(colspan="3")
+                  b-input(v-model="add[0]['사업장소재지']")
+
+              tr
+                td.ctr
+                  .tile.sb
+                    span 업
+                    span 태
+                td.ctr
+                  b-input(v-model="add[0]['업태']")
+
+                td.ctr
+                  .tile.sb
+                    span 종
+                    span 목
+                td.ctr 
+                  b-input(v-model="add[0]['종목']")
+              tr
+                td.ctr
+                  .tile.sb
+                    span 전
+                    span 화
+                    span 번
+                    span 호
+                td.ctr
+                  b-input(v-model="add[0]['전화번호']")
+
+                td.ctr
+                  .tile.sb
+                    span 팩
+                    span 스
+                td.ctr
+                  b-input(v-model="add[0]['팩스']")
+
+          table.report2
+            colgroup.colgroup001
+              col(v-for="_ in Array(34)")
+            tbody
+              tr
+                td.ctr 월
+                td.ctr 일
+                td.ctr(colspan="12") 품 목 / 규 격
+                td.ctr(colspan="3")
+                  .tile.sb
+                    span 단
+                    span 위
+                td.ctr(colspan="3")
+                  .tile.sb
+                    span 수
+                    span 량
+                td.ctr(colspan="5")
+                  .tile.sb 
+                    span 단
+                    span 가
+                td.ctr(colspan="5")
+                  .tile.sb
+                    span 공
+                    span 급
+                    span 가
+                    span 액
+                td.ctr(colspan="4")
+                  .tile.sb
+                    span 세
+                    span 액
+              tr(v-for="item in add[0]['아이템']")
+                td.ctr
+                  b-input(v-model="item['월']")
+                td.ctr
+                  b-input(v-model="item['일']")
+                td(colspan="12")
+                  b-input(v-model="item['품목']")
+                td.ctr(colspan="3")
+                  b-input(v-model="item['단위']")
+                td.ctr(colspan="3")
+                  b-input(v-model="item['수량']")
+                td.right(colspan="5")
+                  b-input(v-model="item['단가']")
+                td.right(colspan="5")
+                  b-input(v-model="item['공급가액']")
+                td.right(colspan="4")
+                  b-input(v-model="item['세액']")
+              tr
+                td(colspan="34")
+                  button.blue(@click="fnAddItem()") 추가
+
+script.
+  Vue.component('reportInstance001', {
+    template: '#report-001',
+    props: ['this_'],
+    data() {
+      return {
+        add: [],
+        flag: '001.pug'
+      }
+    },
+    methods: {
+      fnAdd() {
+        this.this_.add[this.this_.tableName] = this.add
+        this.this_.fnAdd()
+        this.this_.add[this.this_.tableName] = [this.this_.makeOneDummyRow(undefined)]
+        this.add = this.this_.add[this.this_.tableName]
+      },
+      fnAddItem() {
+        this.add[0]['아이템'].push({
+          '월': '',
+          '일': '',
+          '품목': '',
+          '단위': '',
+          '수량': '',
+          '단가': '',
+          '공급가액': '',
+          '세액': ''
+        })
+      },
+      fnUpdate() {
+
+      },
+      fnFind() {
+        //this.this_.fnFind()
+        this.$emit('ddd')
+      },
+      fnExportPdf() {
+        this.this_.fnExportPdf()
+      },
+      fnExportSvg() {
+        this.this_.fnExportSvg()
+      }
+    },
+    created() {
+      this.add = [{"일자":"2023.01.12","No":"MSS-2023-01-12-001","수신인":"브라운","사업자등록번호":"000-000-000","상호":"마이컴퍼니","성명":"브라운","사업장소재지":"경기도 안양시 동안구 평촌대로 239","업태":"서비스","종목":"응용소프트웨어및공급업","전화번호":"000-000-000","팩스":"", "아이템": []}]
+      const thisVar = this
+      EventBus.$on('message', function(select) {
+        thisVar.add = select
+      })
+
+    },
+    mounted()
+    {
+    }
+  })

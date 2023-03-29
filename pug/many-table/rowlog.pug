@@ -1,0 +1,128 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    //meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+    script(type='text/javascript', src="/js/dayjs.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+
+
+body
+  #app
+    header
+      .tile.h50.bg-gray1
+        .tile
+        button.flat.m-tb-auto.mr(style="flex: 0 0 auto;")
+          .tile
+            b-icon.m-tb-auto.mr05(icon="github")
+            span(style="line-height: 1.7em") github
+      .tile.h25.bg-gray2
+        .menu-li
+          .tile
+            .ib(style="width:3em;")
+            .menu-li(v-for="table in tableNames")
+              button.m-auto(@click="tableName = table;fnLoadRowLog()") {{table}}
+
+
+    main
+      h1 {{tableName}} 테이블 이력
+      b-table(:data="rowlog" :td-attrs="(column) => {align: 'right'}" focusable
+        :paginated="true"
+        :per-page="10"
+        :current-page.sync="currentPage"
+      )
+        b-table-column(field="type" label="타입" :width="undefined")
+          template(v-slot="props").
+            {{props.row.type}}
+        b-table-column(field="type" label="유저" :width="undefined")
+          template(v-slot="props").
+            {{props.row.username}}
+        b-table-column(field="date" label="날짜" :width="undefined")
+          template(v-slot="props").
+            {{props.row.date ? props.row.date.format('YY-MM-DD HH:mm:ss') : ''}}
+        b-table-column(field="type" label="비고" :width="undefined")
+          template(v-slot="props")
+            table.log
+              tr 
+                td(v-for="e in Object.values(props.row.row)") {{e}}
+
+
+    footer.tile.bg-gray1
+      .ib(style="width:3em;")
+      .tile.m-auto
+        .ib.m-auto.fs-content.ml.mr © 2023 Many Stallings.
+        button.flat.mr.ml 보안
+        button.flat.mr 사이트맵
+        button.flat 정책
+        button.flat 매니 테이블은 무엇인가요?
+      .tile
+        .ib.m-auto.fs-content.
+          This site is powered by Node.js LevelDB, Vue.js, Buefy
+    
+
+script(type="text/javascript").
+  let user = "#{user}"
+  let v = new Vue({
+    el: '#app',
+    components: {
+    },
+    data: {
+      msg: null,
+      rowlog: [],
+      user: user,
+      tableNames: [],
+      tableName: null,
+      currentPage: 1
+    },
+    methods: {
+      fnLoadTableList: function() {
+        
+        http({uri:"/api/v2/table-list", method:"patch", param: {tableName: this.tableName}, cb: (res) => {
+          console.log(res)
+          this.tableNames = Object.keys(res.result.columns)
+        }})
+      },
+      fnLoadRowLog: function() {
+        http({uri:"/api/v2/rowlog", method:"patch", param: {tableName: this.tableName, id: 8}, cb: (res) => {
+          this.rowlog = res.result.map(e => {
+            const chunk = e.split(' 구분자 ')
+
+            if(chunk.length == 3)
+              return {username: chunk[0], type: chunk[1], date: dayjs(chunk[2]), row: {}}
+            else if(chunk.length == 4)
+              return {username: chunk[0], type: chunk[1], date: dayjs(chunk[2]), row: JSON.parse(chunk[3])}
+            else
+              return {username: '', type: '', date: null, row: ''}
+
+          })
+        }})
+      },
+    },
+    created() {
+      this.fnLoadTableList()
+    }
+  })
+
+
+
+
+
+
+
+
+
+

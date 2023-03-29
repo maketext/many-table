@@ -1,0 +1,143 @@
+doctype html
+html.h100
+  head
+    meta(charset='utf-8')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+      label.check {
+        display: flex;
+        align-items: center;
+        height: 2em;
+      }
+
+      /* 기본 인풋 요소 가림 */
+      label input {
+        display: none;
+      }
+
+      /* 언체크된 체크박스 모양 */
+      label span.check {
+        height: 2em;
+        width: 2em;
+        margin-right: 1em;
+        border: 2px solid rgb(30, 30, 33);
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      /* div + p	Selects the first <p> element that is placed immediately after <div> elements*/
+      /* 인라인 블록 부모 요소 안에 블록 자식 요소가 들어가므로 자식 요소가 부모 요소 영역에 꽉 차게 된다. */
+      [type=checkbox]:checked + span.check:before {
+        content: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Ctitle%3Etruck-check%3C%2Ftitle%3E%3Cpath%20d%3D%22M3%2C4H17V8H20L23%2C12V17H21A3%2C3%200%200%2C1%2018%2C20A3%2C3%200%200%2C1%2015%2C17H9A3%2C3%200%200%2C1%206%2C20A3%2C3%200%200%2C1%203%2C17H1V6C1%2C4.89%201.9%2C4%203%2C4M17%2C9.5V12H21.47L19.5%2C9.5H17M6%2C15.5A1.5%2C1.5%200%200%2C0%204.5%2C17A1.5%2C1.5%200%200%2C0%206%2C18.5A1.5%2C1.5%200%200%2C0%207.5%2C17A1.5%2C1.5%200%200%2C0%206%2C15.5M18%2C15.5A1.5%2C1.5%200%200%2C0%2016.5%2C17A1.5%2C1.5%200%200%2C0%2018%2C18.5A1.5%2C1.5%200%200%2C0%2019.5%2C17A1.5%2C1.5%200%200%2C0%2018%2C15.5M8%2C14L14%2C8L12.59%2C6.58L8%2C11.17L5.91%2C9.08L4.5%2C10.5L8%2C14Z%22%20%2F%3E%3C%2Fsvg%3E");
+        display: block;
+        transform: translateX(2px);
+        width: 26px;
+      }
+ 
+body.h100
+  #app.h100
+    header(stlye="height: 0;")
+    main.tile.h100
+      ib.m-auto(style="width: 500px;height:600px;")
+        .tile.h100.box.login-box.hin
+          .ib.m-auto
+            .h10
+            .tile
+              h1.m-auto(style="font-size: 2em;") {{message ? message : '로그인'}}
+            .h10
+            .h10
+            p {{failLoginMessage}}
+            .tile.is-vertical
+              div.h20(v-if="labelPositionId == 'on-border'")
+              form(action='/many-table/login', method='post')
+                b-field(label='아이디', :label-position='labelPositionId', message='아이디를 입력하세요.')
+                  b-input(name="username" v-model='id', placeholder="아이디" maxlength='50' @focus="labelPositionId = 'on-border'" @blur="labelPositionId = 'undefined'")
+                div.h20(v-if="labelPositionPw == 'on-border'")
+                b-field(label='비밀번호', :label-position='labelPositionPw', message='비밀번호를 입력하세요.')
+                  b-input(type="password" name="password" v-model='pw', placeholder="비밀번호", password-reveal="passwordReveal" maxlength='50' @focus="labelPositionPw = 'on-border'" @blur="labelPositionPw = 'undefined'")
+                .tile.h50
+                  button.blue.m-tb-auto(type="submit" style="flex: 1;")
+                    .tile
+                      .m-auto(style="line-height: 1.7em") 로그인
+                .tile.is-vertical
+                  .tile.mb
+                    b-radio(v-model='remember_me', name='remember_me', native-value='un') 100일간
+                  div 로그아웃을 하면 자동로그인이 취소됩니다.
+                .tile
+                  .tile
+                  a(href="/many-table/sign-up-begin" target="_blank") 회원가입
+                  .ib.m-auto(style="float:right;")
+
+    footer.tile.bg-gray1
+      .ib(style="width:3em;")
+      .tile.m-auto
+        button.flat.ml.mr 회원가입
+
+    
+
+script(type="text/javascript").
+  let failLoginMessage = "#{message}"
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        failLoginMessage: failLoginMessage,
+        labelPositionId: undefined,
+        id: '',
+        labelPositionPw: undefined,
+        pw: '',
+        remember_me: '-',
+        message: ''
+      },
+      methods: {
+        fnLogout: function(e) {
+          const thisVar = this
+          http({uri:"/many-table/logout", method:"delete", param: {}, cb: (res) => {
+            //res = {code, msg, result}
+            console.log(res)
+            if(res.code == 0)
+            {
+              this.message = '로그아웃 되었습니다.'
+              setTimeout(() => thisVar.message = '', 5000)
+            }
+            else 
+              this.message = '오류'
+          }})
+        }
+      },
+      computed: {
+      },
+      created()
+      {
+      },
+      mounted()
+      {
+      }
+  })
+
+
+
+
+
+
+
+
+
+

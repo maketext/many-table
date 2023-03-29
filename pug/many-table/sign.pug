@@ -1,0 +1,478 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/dayjs.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/crud.js")
+    script(type='text/javascript', src="/js/modal.js")
+    script(type='text/javascript', src="/js/lodash.js")
+    script(type='text/javascript', src='/js/toastui-chart.min.js')
+    
+    
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+    link(rel='stylesheet', href='/css/toastui-chart.min.css')
+    
+
+    title 매니테이블 - 결제
+    style.
+      table.sign {
+          width: 100%;
+      }
+      table.sign, td, th {
+          border : 0.1px solid black;
+          border-collapse : collapse;
+      }
+      table td, table th {
+        vertical-align: middle;
+      }
+      table.sign td:nth-child(1) {
+          width: 15%;
+      }
+      table.sign td:nth-child(2) {
+          width: 19%;
+      }
+      table.sign td:nth-child(3) {
+          width: 5%;
+      }
+      table.sign td:nth-child(4) {
+          width: 17%;
+      }
+      table.sign td:nth-child(5) {
+          width: 17%;
+      }
+      table.sign td:nth-child(6) {
+          width: 17%;
+      }
+      .ctr {
+          vertical-align: middle !important;
+          text-align: center !important;
+      }
+      .m1 {
+          display: inline-block;
+          width: calc(2em);
+      }
+      .m2 {
+          display: inline-block;
+          width: calc(1em / 2);
+      }
+      .flex {
+          display: flex;
+          flex-direction: column;
+      }
+      .signarea {
+          margin:auto;
+          font-size: 0.5em;
+      }
+
+body
+  #app
+    main.p0.front
+      .tile.is-vertical
+        .tile.p
+          .ib.m-auto.logo-place.ml
+            b-image.logo(src="/img/logo.svg")
+          .tile.is-vertical
+            .tile.ml.p-lr.title-area
+              h1 결제
+            .bg-help.ml.p-lr
+              h2(:style="msgCSS") {{msg}}
+
+      .tile.is-vertical.menu-report
+        h2 작성한 결제서류 (결제서류 수신함으로 변경 예정)
+        div
+          b-table.pr(ref="table" :data="select[tableNameFront]" :td-attrs="(column) => {align: 'right'}" :selected.sync="selectedRow[tableNameFront]" focusable @select="fnSelectSign"
+            :paginated="true"
+            :per-page="10"
+            :current-page.sync="currentPage"
+            :sort-multiple="true"
+            :sort-multiple-key="null"
+            )
+            b-table-column(v-for='(column, index) in columns[tableNameFront]', :field='column.field' :label='column.label', :width="widthOfTableCell" :visible='column.visible' searchable sortable)
+              template(v-slot='props' #searchable='props' :key="column.field" v-bind="column")
+                .tile
+                  b-input(v-model='props.filters[column.field]', :placeholder='props.column.label')
+                  b-icon.ml(v-if="index == columns[tableNameFront].length - 1" icon="magnify")
+
+              template(v-slot="props")
+                div.p02(@contextmenu="onControlRow($event, props)")
+                  div(v-if="column.type == '체크박스'")
+                    b-checkbox(v-if="props.row[column.field] == '예' || props.row[column.field] == '아니오'" v-model="props.row[column.field]" true-value="예", false-value="아니오" disabled="true")
+                    b-checkbox(v-else :indeterminate="true" disabled="true")
+                  div.h17.overflow(v-else-if="column.type == '링크'")
+                    a(:href ="props.row[column.field]") {{props.row[column.field]}}
+                  div.h17.overflow.cursor(v-else-if="column.type == '멀티라인'" @click="onShowMultilineText(props.row[column.field])") {{ typeof props.row[column.field] === 'string' && props.row[column.field].length > 10 ? props.row[column.field].substr(0, 10) : props.row[column.field]}}{{'...'}}
+                  div(v-else-if="column.type == '스타'")
+                    b-rate(disabled v-model='props.row[column.field]' :custom-text='props.row[column.field]')
+                  div.cursor(v-else-if="column.type == '날짜'")
+                    span(v-if="dayjs(props.row[column.field]).toString() =='Invalid Date'") 없음
+                    span(v-else) {{ dayjs(props.row[column.field]).format('YYYY-MM-DD') }}
+                  //b-datetimepicker(v-model='props.row[column.field]', rounded, placeholder='선택하면 날짜가 나옵니다.', icon='calendar-today', :locale='datetimeOption.locale', :datepicker='{ datetimeOption.datepicker }', :timepicker='{ datetimeOption.timepicker1, datetimeOption.timepicker2 }', horizontal-time-picker)
+                  div(v-else-if="column.type == '첨부파일'")
+                    .tile
+                      b-upload.file-label(@input="fnUpload($event, props.row, column.field)")
+                        b-icon.m-tb-auto.mr(icon="upload" title="파일을 업로드합니다.")
+                      a.ml(v-if="!_.isNil(props.row[column.field]) && props.row[column.field] != 'undefined'" :href="'/api/v2/file-list/download/' + props.row[column.field]" title="파일을 다운로드합니다.")
+                        b-icon.m-tb-auto(icon="file-outline")
+
+                  div.h17(v-else-if="column.type == '정수'") {{ _.toInteger(props.row[column.field]) }}
+                  div.h17(v-else-if="column.type == '실수'") {{ Number(props.row[column.field]) }}
+                  div.h17(v-else-if="column.type == '다중값필드'") 
+                    button.blue(@click="onShowJsonViewer(props.row[column.field])") 다중값
+
+                  div.h17(v-else) {{ props.row[column.field] }}
+        button.blue.mr.mt.mb(@click="functionName='결제 서류 신규';fnNew()" :style="isClickedFunctionalButtonCSS('결제 서류 신규')") 결제 서류 신규
+      .tile.pt
+        .tile.ml.is-3.is-vertical
+
+          .tile.flex-auto
+            button.functional.sign.mr(@click="functionName='결재 요청';fnSignRequest();" :style="isClickedFunctionalButtonCSS('결재 요청')") {{signRequestTo['이름'] ? signRequestTo['이름'] + ' 에게' : ''}} 결재 요청
+          //-b-select(v-if="functionName == '싸인하기'" placeholder='직원 테이블 변경' @input="fnSignRequest" v-model="signPlace")
+            optgroup(label='결제 구분')
+              option(v-for="(column, index) in ['담당', '부장', '임원']" :value='column') {{column}}
+              option(:value='false') 취소
+          h2.mt.mb 수신자 선택
+          b-table.pr(ref="table" :data="select[tableName]" :td-attrs="(column) => {align: 'right'}" :selected.sync="selectedRow[tableName]" focusable @select="fnSelectHuman"
+            :paginated="true"
+            :per-page="10"
+            :current-page.sync="currentPage"
+            :sort-multiple="true"
+            :sort-multiple-key="null"
+            )
+            b-table-column(v-for='(column, index) in columns[tableName]', :field='column.field' :label='column.label', :width="widthOfTableCell" :visible='column.visible' searchable sortable)
+              template(v-slot='props' #searchable='props' :key="column.field" v-bind="column")
+                .tile
+                  b-input(v-model='props.filters[column.field]', :placeholder='props.column.label')
+                  b-icon.ml(v-if="index == columns[tableName].length - 1" icon="magnify")
+
+              template(v-slot="props")
+                div.h17 {{ props.row[column.field] }}
+          div
+            button.blue.mr.mt.mb(v-if="_.isNil(name) || name == ''" @click="functionName='기안자 로그인 필요';" :style="isClickedFunctionalButtonCSS('기안자 로그인 필요')") 기안자 로그인 필요
+            button.blue.mr.mt.mb(v-else @click="functionName='수신자 검색';fnFind()" :style="isClickedFunctionalButtonCSS('수신자 검색')") 수신자 검색
+          //-.tile.is-vertical.flex-auto
+            button.functional.mr.mt(@click="functionName='직원명부 변경';isSetTableNameActive = true;beforeTableName = tableName;" :style="isClickedFunctionalButtonCSS('직원명부 변경')") 직원명부 변경
+            .tile.is-vertical(v-if="isSetTableNameActive")
+              .tile.is-vertical
+                span.mt 테이블명
+                b-input.pr(v-model="tableName")
+              .tile.mt
+                button.functional.mr(@click="functionName='직원명부 테이블 지정 확인';isSetTableNameActive = false;beforeTableName = tableName;fnSetTableName();" :style="isClickedFunctionalButtonCSS('직원명부 테이블 지정 확인')")
+                  div 확인
+                  div.fs-content.lh (새로고침 됩니다.)
+                button.functional.mr(@click="functionName='직원명부 테이블 지정 취소';isSetTableNameActive = false;tableName = beforeTableName;" :style="isClickedFunctionalButtonCSS('직원명부 테이블 지정 취소')") 취소
+              //-b-select(v-if="isSetTableNameActive && columns.keys().length > 0" placeholder='직원 테이블 변경' @input="setTableName" native-size="5")
+                optgroup(label='직원 테이블을 선택하세요.')
+                  option(:value='false') 취소
+                  option(v-for='(column, index) in columns.keys()' :value='column') {{column}}
+        .tile.is-vertical
+          .tile
+            span.lh 발신: {{add[tableNameFront][0]['발신인'].length > 0 ? _.last(add[tableNameFront][0]['발신인'])['발신인'] : ''}}
+          .tile
+            span.lh 수신: {{add[tableNameFront][0]['수신인'].length > 0 ? _.last(add[tableNameFront][0]['수신인'])['수신인'] : ''}}
+          div(style="display:inline-block;width: 21cm;height:calc(29.7cm);padding:2em 1em;border:1px dashed black;" ref='printarea')
+            table.sign
+              tbody
+                tr
+                  td.ctr 기안번호
+                  td
+                    b-input(v-model="add[tableNameFront][0]['기안번호']" placeholder="입력")
+                  td.ctr(rowspan="5")
+                    span 결
+                    div(style="height:calc(1.6em);")
+                    span 재
+                  td.ctr 담당
+                  td.ctr 부장
+                  td.ctr 임원
+                tr
+                  td.ctr 보존연도
+                  td
+                    b-input(v-model="add[tableNameFront][0]['보존연도']" placeholder="입력")
+                  td.ctr(rowspan="3")
+                    span(v-if="fnSign(1, 'check')") {{add[tableNameFront][0]['담당전자서명']}}
+                    button.winXP-btn(v-else @click="fnSign(1)")
+                      span {{name ? '서명' : '로그인 필요' }}
+                  td.ctr(rowspan="3")
+                    span(v-if="fnSign(2, 'check')") {{add[tableNameFront][0]['부장전자서명']}}
+                    button.winXP-btn(v-else @click="fnSign(2)")
+                      span {{name ? '서명' : '로그인 필요' }}
+                  td.ctr(rowspan="3")
+                    span(v-if="fnSign(3, 'check')") {{add[tableNameFront][0]['임원전자서명']}}
+                    button.winXP-btn(v-else @click="fnSign(3)")
+                      span {{name ? '서명' : '로그인 필요' }}
+                tr
+                  td.ctr 기안일자
+                  td 
+                    b-input(v-model="add[tableNameFront][0]['기안일자']" placeholder="입력")
+                tr
+                  td.ctr 기안부서
+                  td 
+                    b-input(v-model="add[tableNameFront][0]['기안부서']" placeholder="입력")
+                tr
+                  td.ctr
+                    span 기
+                    span.m2
+                    span 안
+                    span.m2
+                    span 자
+                  td
+                    b-input(v-model="add[tableNameFront][0]['기안자']" placeholder="입력")
+                  td
+                    b-datepicker(type='day', placeholder='날짜', icon='calendar-today', trap-focus)
+                  td
+                    b-datepicker(type='day', placeholder='날짜', icon='calendar-today', trap-focus)
+                  td
+                    b-datepicker(type='day', placeholder='날짜', icon='calendar-today', trap-focus)
+                //-tr
+                  td.ctr
+                    span 수
+                    span.m1
+                    span 신
+                  td(colspan="5")
+                    b-input(v-model="_.last(add[tableNameFront][0]['수신인'])['수신인']" placeholder="입력")
+                tr
+                  td.ctr
+                    span 제
+                    span.m1
+                    span 목
+                  td(colspan="5")
+                    b-input(v-model="add[tableNameFront][0]['제목']" placeholder="입력")
+            b-input(type="textarea" v-model="add[tableNameFront][0]['내용']" placeholder="입력")
+            p 초안 : 이미지 추가 기능
+            p 초안 : 파일 업로드 기능
+    .tile.pt
+      b-modal(v-model='isShowModalFindActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-find-form(v-bind='formProps', @close='props.close')
+      
+
+script(type="text/javascript").
+  const currentUser = {}
+  currentUser.username = "#{username}"
+  currentUser.name = "#{name}"
+  const tableNameGlobal = JSON.parse(decodeURIComponent(escape(atob("#{tableName}"))))
+
+  console.log(tableNameGlobal)
+  function len(str)
+  {
+      if(str == undefined) return 0
+      if(str == null) return 0
+      if(str.hasOwnProperty('length')) return str.length
+      return 0
+  }
+  Array.prototype.isLast = function(obj) {
+      if(this[this.length - 1] === obj) return true 
+      return false
+  }
+
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        isActive: false,
+        isShowModalFindActive: false,
+        isSetTableNameActive: false,
+        isAddActive: false,
+
+        widthOfTableCell: undefined,
+
+        functionName: '',
+        msg: '',
+        msgColor: 'black',
+        msgBackground: 'white',
+        currentPage: 1,
+        formProps: {},
+
+
+        name: currentUser.name,
+        tableName: tableNameGlobal['직원명부'],
+        tableNameFront: tableNameGlobal['결제'],
+        columns: [],
+        add: {},
+        select: {},
+        selectedRow: {},
+
+        signPlace: false,
+        signRequestTo: ''
+      },
+      methods: {
+        // 공통
+        makeOneDummyRow: function(id, tableName) {
+          let row = {}
+          if(_.isNil(tableName)) tableName = this.tableName
+          if(!Array.isArray(this.columns[tableName])) return undefined
+          for(field of this.columns[tableName])
+            row[field.field] = ''
+          if(id)
+            row.id = id
+          delete row.null
+          return row
+        },
+        setTableName: function(value) {
+          if(value == false) return
+          this.tableName = value
+        },
+        fnFind: function (cmd) {
+
+          //fnFind('결제용')
+          let tableName, selectTableName, thisVar = this
+          if(cmd === undefined)
+          {
+            tableName = tableNameGlobal['직원명부']
+            selectTableName = 'select'
+          }
+          else 
+          {
+            tableName = tableNameGlobal['결제']
+            selectTableName = 'add'
+          }
+
+          const rowObj = this.makeOneDummyRow(undefined, tableName)
+          if(rowObj === undefined)
+          {
+            this.msg = '테이블이 존재하지 않거나 비어 있습니다.'
+            this.msgColor = 'red'
+            return
+          }
+          //crud.fnFind('isShowModalFindActive', tableName, selectTableName)
+          crud.fnFind('isShowModalFindActive', tableName)
+        },
+
+        // 공통 끝
+
+        // 본인 서명 및 상급자 결제 요청
+        fnSignRequest: function() {
+          if(!this.isActive)
+          {
+            alert('결제 서류 신규 버튼을 눌러 주십시오.')
+            return
+          }
+          this.isAddActive = true
+          crud.fnAdd('isAddActive', '결제')
+
+          this.msg = '서명이 완료되었습니다.'
+          this.msgColor = 'black'
+          this.msgBackground = 'white'
+
+          // 초안: 서명 요청, username과 name은 세션 데이터를 활용하므로 요청 파라미터에서 제외
+        },
+        fnSetTableName: function() {
+          //
+          http({uri:"/api/v2/env", method:"post", param: {'직원명부': this.tableName}, cb: (res) => {
+            //res = {code, msg, result}
+            if(res.code == 0)
+              this.msg = '결제, 서명에 사용할 직원 테이블 변경 완료.'
+            window.location.reload(true)
+          } })
+
+        },
+        fnSelectHuman: function(e) {
+          this.msg = '수신자를 선택했습니다.'
+          this.msgColor = 'red'
+          this.msgBackground = '#fdd'
+          console.log(e)
+          this.signRequestTo = e
+
+          this.add[this.tableNameFront][0]['발신인'].push({'발신인': this.name})
+          this.add[this.tableNameFront][0]['수신인'].push({'수신인': this.signRequestTo['이름']})
+        },
+        fnSelectSign: function(e) {
+          
+        },
+        fnNew: function(cmd) {
+          this.isActive = true
+          alert('결제 서류 신규 버튼을 클릭하셨습니다.')
+        }
+      },
+      computed: {
+      },
+      created()
+      {
+        crud.set(this)
+        this.add[this.tableNameFront] = [{
+          '발신인': [],
+          '수신인': [],
+          '기안번호': '',
+          '보존연도': '',
+          '기안일자': '',
+          '기안부서': '',
+          '기안자': '',
+          '수신': '',
+          '제목': '',
+          '내용': ''
+        }]
+        this.select[this.tableNameFront] = []
+
+        //this.add[this.tableNameFront][0]['발신인'].push({'발신인': this.name})
+        //this.add[this.tableNameFront][0]['수신인'].push({'수신인': this.signRequestTo['이름']})
+      },
+      mounted()
+      {
+        if(_.isNil(tableNameGlobal) || tableNameGlobal == '')
+        {
+          this.msg = '상단의 "직원명부 테이블 지정" 버튼을 클릭해 직원 검색을 위한 테이블을 지정하십시오.'
+          return
+        }
+
+        // 직원리스트 테이블 컬럼 메타 정보 획득
+        http({uri:"/api/v2/table-list", method:"patch", param: {tableName: [this.tableName, this.tableNameFront]}, cb: (res) => {
+          //res = {code, msg, result}
+          console.log("HTTP 응답", res)
+          if(res.code == 0)
+          {
+            this.columns = _.cloneDeep(res.result.columns)
+            this.msg = '결제 서류 신규 버튼을 클릭하거나 수신함에서 서류를 선택하십시오.'
+          }
+        }})
+
+        // 문서번호 자동생성 요청
+        /*
+        http({uri:"/api/v2/document-no", method:"patch", param: {}, cb: (res) => {
+          //res = {code, msg, result}
+          console.log("HTTP 응답", res)
+          if(res.code == 0)
+            this.doc['기안번호'] = res.no
+        } })*/
+
+      },
+      computed: {
+        isClickedFunctionalButtonCSS: function() {
+          return (name) => {
+            if(this.functionName !== name) return {}
+            return {background: '#99B', color: '#fff'}
+          }
+        },
+        msgCSS: function() {
+          return {color: this.msgColor, background: this.msgBackground}
+        },
+        fnSign: function () {
+          return (order, cmd) => {
+            const map = {'1': '담당전자서명', '2': '부장전자서명', '3': '임원전자서명'}
+            if(cmd === 'check')
+              return typeof this.add[this.tableNameFront][0][map[order]] === 'string' && this.add[this.tableNameFront][0][map[order]].length >= 3
+            this.add[this.tableNameFront][0][map[order]] = '서명됨'
+            this.$forceUpdate()
+            return false
+          }
+        },
+
+      }
+  })
+
+
+
+
+
+
+
+
+
+

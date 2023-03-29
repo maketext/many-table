@@ -1,0 +1,998 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/dayjs.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/crud.js")
+    script(type='text/javascript', src="/js/lodash.js")
+    script(type='text/javascript', src='/js/toastui-chart.min.js')
+    script(type='text/javascript', src='/js/dom-to-image.js')
+    script(type='text/javascript', src="/js/modal.js")
+    
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/button.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+    link(rel='stylesheet', href='/css/toastui-chart.min.css')
+
+    title Many Table
+
+    style.
+      @keyframes blink {
+        0% {
+        }
+        50% {
+        }
+        100% {
+          background: gray;
+          color: white;
+        }
+      }
+      @keyframes slidedown {
+        0% {
+          transform: translateX(-5px);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+        100% {
+          transform: translateX(0px);
+        }
+      }
+      button.functional.autosave-button:hover {
+        animation: slidedown 0.1s cubic-bezier(0.1, 0.7, 1, 0.1) 1 normal forwards;
+      }
+      button.table-select:hover {
+        animation: blink 0.1s cubic-bezier(0.1, 0.7, 1, 0.1) 1 normal forwards;
+        
+      }
+
+
+body
+  #app
+    header
+      .tile.h50
+        .tile.logo-place(style="flex: 0 0 auto;")
+          .ib.m-auto.ml.mr.left-blank
+            b-image.logo(src="/img/logo.svg")
+        button.flat(@click="isChangeLogoTitle = true;setTimeout(() => $refs.changeLogoTitle.focus(), 100);")
+          b-input.m-tb-auto(ref="changeLogoTitle" v-if="isChangeLogoTitle" @keyup.native.enter="isChangeLogoTitle = false" v-model="logoTitle" @blur="setTimeout(() => isChangeLogoTitle = false, 100);")
+          h1.m-tb-auto(v-else style="flex: 0 0 auto;")
+            | {{logoTitle}}
+        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+        .ib.m-tb-auto.ml
+          a(href="/many-table/front") 메인
+        .ib.m-tb-auto.ml
+          a(href="/many-table/new-table") 테이블 관리
+        .ib.m-tb-auto.ml
+          a(href="/many-table/permission") 권한
+        .ib.m-tb-auto.ml
+          a(href="/many-table/sign") 결제
+        .ib.m-tb-auto.ml
+          a(href="/many-table/report") 보고서 출력
+        .tile
+        button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
+          span(style="line-height: 1.7em") 로그아웃
+        //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
+          .tile
+            b-icon.m-tb-auto.mr05(icon="github")
+            span(style="line-height: 1.7em") github
+
+      .tile.h25.bg-gray2.bg-lightblue
+        .menu-li
+          .ib(style="width:3em;")
+        .menu-li(v-for="name in Object.keys(select)")
+          button.bg-gray2.noborder.table-select(@click="tableName = name" :style="isClickedButtonCSS(name)") {{name}}
+      .tile.p
+        .menu-li
+          button.functional.mr(@click="fnFind();functionName='검색';" :style="isClickedFunctionalButtonCSS('검색')") 검색
+          button.functional.mr(@click="fnAdd();functionName='추가';" :style="isClickedFunctionalButtonCSS('추가')") 추가
+          button.functional.mr(@click="$refs.table.resetMultiSorting();functionName='정렬취소'" :style="isClickedFunctionalButtonCSS('정렬취소')") 정렬취소
+          button.functional.mr(@click="fnUndo();functionName='숨김취소';isClickedHideButton = false" :style="isClickedFunctionalButtonCSS('숨김취소')") 숨김취소
+          button.functional.mr(@click="functionName='컬럼길이조정';widthOfTableCell = widthOfTableCell == undefined ? 100 : undefined;" :style="isClickedFunctionalButtonCSS('컬럼길이조정')") 컬럼길이조정
+          button.functional.autosave-button.mr(disabled @click="functionName='저장';" :style="isClickedFunctionalButtonCSS('저장')") 편집시 자동저장됩니다.
+          button.functional.mr(@click="exportCSV();functionName='CSV';" :style="isClickedFunctionalButtonCSS('CSV')") CSV 내보내기
+          button.functional.mr(@click="functionName='차트';" :style="isClickedFunctionalButtonCSS('차트')") 차트
+          b-dropdown.mr(v-if="functionName=='차트'" v-model='selectedColumns', multiple, aria-role='list')
+            template(#trigger)
+              b-button(type='is-primary', icon-right='menu-down')
+                | 선택됨 ({{ selectedColumns.length }})
+            b-dropdown-item(v-for='(column, index) in columns[tableName]' :value='column.field', aria-role='listitem')
+              span {{column.label}}
+          button.functional.mr(v-if="functionName=='차트'" @click="fnInitChart" :style="isClickedFunctionalButtonCSS('열기')") 열기
+
+          //-b-select(v-if="functionName=='차트'" placeholder='컬럼을 선택하세요.' @input="fnInitChart" multiple native-size="5")
+            optgroup(:label='tableName')
+              option(:value='false') 없음
+              option(v-for='(column, index) in columns[tableName]' :value='column.field') {{column.label}}
+
+          b-icon.m-tb-auto.mr05(icon="face-man-profile")
+          span.m-tb-auto.fs-content 
+            div 데이터를 수정하려면 셀 안에서 마우스 오른쪽 버튼을 누르세요.
+            div 정렬하려면 필드명을 클릭하세요.
+      b-message(title='행 추가', v-model='isAddFormActive', aria-close-label='누르면 닫힙니다.')
+        b-table(:data="add[tableName]" :td-attrs="(column) => {align: 'right'}")
+          b-table-column(v-for='(column, index) in columns[tableName]', :key='index', :label='column.label', :visible="column.visible")
+            template(v-slot="props")
+              div(v-if="column.type == '날짜'")
+                b-datepicker(v-model="props.row[column.field]" icon="calendar-today" locale="ko-KR")
+              b-input(v-else v-model="props.row[column.field]")
+              span {{column.field}}
+
+
+
+    main.p0.front
+      b-table(ref="table" :data="_.isNil(selectDo[tableName]) ? select[tableName] : selectDo[tableName]" :td-attrs="(column) => {align: 'right'}" :selected.sync="selectedRow[tableName]" focusable @select=""
+        :paginated="true"
+        :per-page="10"
+        :current-page.sync="currentPage"
+        :sort-multiple="true"
+        :sort-multiple-key="null"
+      )
+        b-table-column
+          template(v-slot='props' :key="56bffc60183af577771fc4c3f8c2bfdf")
+            .tile.h17(:style="fnCellCSS(props.row.metaTag)")
+              b-button.flat(@click="fnRedo(props.row);isClickedHideButton = true" title="사용자의 컴퓨터에서만 일시적으로 하나의 행을 숨김니다. 다시 보이게 하려면 '숨김취소' 버튼을 누르세요.")
+                b-icon.m-t-auto(icon="filter-minus-outline")
+        b-table-column(v-for='(column, index) in columns[tableName]', :field='column.field' :label='column.label', :width="widthOfTableCell" :visible='column.visible' searchable sortable)
+          //template(v-slot:header='{ column, index }')
+            span(v-if="index < columns[tableName].length - 1").
+              {{column.label}}
+            .tile(v-else)
+              .ib.mr {{column.label}}
+              .tile
+              b-icon(icon="filter-outline")
+              
+          template(v-slot='props' #searchable='props' :key="column.field" v-bind="column")
+            .tile
+              b-input(v-model='props.filters[column.field]', :placeholder='props.column.label')
+              b-icon.ml(v-if="index == columns[tableName].length - 1" icon="magnify")
+
+          template(v-slot="props")
+            div.p02(@contextmenu="onControlRow($event, props)")
+              div(v-if="column.type == '체크박스'")
+                b-checkbox(v-if="props.row[column.field] == '예' || props.row[column.field] == '아니오'" v-model="props.row[column.field]" true-value="예", false-value="아니오" disabled="true")
+                b-checkbox(v-else :indeterminate="true" disabled="true")
+              div.h17.overflow(v-else-if="column.type == '링크'")
+                a(:href ="props.row[column.field]") {{props.row[column.field]}}
+              div.h17.overflow.cursor(v-else-if="column.type == '멀티라인'" @click="onShowMultilineText(props.row[column.field])") {{ typeof props.row[column.field] === 'string' && props.row[column.field].length > 10 ? props.row[column.field].substr(0, 10) : props.row[column.field]}}{{'...'}}
+              div(v-else-if="column.type == '스타'")
+                b-rate(disabled v-model='props.row[column.field]' :custom-text='props.row[column.field]')
+              div.cursor(v-else-if="column.type == '날짜'")
+                span(v-if="dayjs(props.row[column.field]).toString() =='Invalid Date'") 없음
+                span(v-else) {{ dayjs(props.row[column.field]).format('YYYY-MM-DD') }}
+              //b-datetimepicker(v-model='props.row[column.field]', rounded, placeholder='선택하면 날짜가 나옵니다.', icon='calendar-today', :locale='datetimeOption.locale', :datepicker='{ datetimeOption.datepicker }', :timepicker='{ datetimeOption.timepicker1, datetimeOption.timepicker2 }', horizontal-time-picker)
+              div(v-else-if="column.type == '첨부파일'")
+                .tile
+                  b-upload.file-label(@input="fnUpload($event, props.row, column.field)")
+                    b-icon.m-tb-auto.mr(icon="upload" title="파일을 업로드합니다.")
+                  a.ml(v-if="!_.isNil(props.row[column.field]) && props.row[column.field] != 'undefined'" :href="'/api/v2/file-list/download/' + props.row[column.field]" title="파일을 다운로드합니다.")
+                    b-icon.m-tb-auto(icon="file-outline")
+
+              div.h17(v-else-if="column.type == '정수'") {{ _.toInteger(props.row[column.field]) }}
+              div.h17(v-else-if="column.type == '실수'") {{ Number(props.row[column.field]) }}
+              div.h17(v-else-if="column.type == '다중값필드'") 
+                button.blue(@click="onShowJsonViewer(props.row[column.field])") 다중값
+
+              div.h17(v-else) {{ props.row[column.field] }}
+      
+
+      b-modal(v-model='isShowModalActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          show-modal-form(v-bind='formProps', @close='props.close')
+      b-modal(v-model='isControlModalActive', has-modal-card, trap-focus, :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-form(v-bind='formProps', @close='props.close')
+      b-modal(v-model='isShowModalChartActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-chart-form(v-bind='formProps', @close='props.close')
+      b-modal(v-model='isShowModalFindActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-find-form(v-bind='formProps', @close='props.close')
+      b-modal(v-model='isShowModalHelpActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-help-form(v-bind='formProps', @close='props.close')
+      b-modal(v-model='isShowModalJsonViewerActive', has-modal-card='', trap-focus='', :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal='')
+        template(#default='props')
+          modal-json-viewer-form(v-bind='formProps', @close='props.close')
+          
+    footer.tile.bg-gray1
+      .ib.desktop(style="width:3em;")
+      .tile
+        .ib.m-auto.fs-content.ml.mr.message-desktop © 2023 Many Stallings.
+        button.footer.flat.mr.ml 보안
+        button.footer.flat.mr(@click="onShowHelp();") 도움말
+        button.footer.flat.mr 정책
+        .ib.m-auto.ml.fs-content.message-desktop
+          a(href="/many-table/whatisit") 매니 테이블은 무엇인가요?
+      .tile.desktop
+        .ib.m-auto.fs-content.message-desktop.
+          This site is powered by...
+    
+
+script(type="text/javascript").
+  let currentUser = "#{user}"
+  currentUser = _.replace(currentUser, /&quot;/g, '"')
+  console.log(currentUser)
+  currentUser = JSON.parse(currentUser)
+
+  function exportTableToCSV(table, tableName) {
+      const csv = []
+
+      for(const row of table)
+      {
+        const rowContent = []
+        for(const col in row)
+        {
+          if(col == 'metaTag') continue
+          if(col == 'id') continue
+          if(_.isNil(row[col]))
+            row[col] = ''
+          rowContent.push(`"${row[col]}",`)
+        }
+        let onerow = rowContent.join('')
+        csv.push(onerow.substring(0, onerow.length - 1))
+      }
+      downloadCSV(csv.join("\n"), `${dayjs().format("YYYY-MM-DD")}_${tableName}.csv`)
+  }
+
+  function downloadCSV(csv, filename) {
+    let csvFile
+    let downloadLink
+
+    csvFile = new Blob([csv], {type:"text/csv"})
+    downloadLink = document.createElement("a")
+    downloadLink.download = filename
+    downloadLink.href = window.URL.createObjectURL(csvFile)
+    downloadLink.style.display = "none"
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+  }
+  function fillFields(row, option) {
+    const backupRow = _.cloneDeep(row)
+    row = {}
+    this.columns[this.tableName].forEach(field => {
+      console.log(field.field, field.label)
+      if(field.field != null)
+        row[field.field] = backupRow[field.field] ? backupRow[field.field] : null
+    })
+
+    if(option != '프린트')
+    {
+      row.id = backupRow.id
+      row.metaTag = backupRow.metaTag
+    }
+    delete row['null']
+    console.log(row, '애프터필필드인')
+    return row
+  }
+
+  const ModalForm = {
+      props: ['propsRowRef', 'row', 'rowlog', 'cmdTag', 'lbl', 'newRow', 'this_', 'column', 'minWidthCSS'],
+      methods: {
+        fnUpdate: function() {
+          copyObjectByValue(this.newRow, this.propsRowRef)
+          this.this_.$forceUpdate()
+          this.$emit('close')
+        },
+        fnDatePick: function(k, v) {
+          this.newRow[k] = v
+        },
+        cssHeight: function(e, msg) {
+          e.target.style.height = `${e.target.scrollHeight}px`
+        },
+        toggleRowLog: function () {
+          this.cmdTag = this.cmdTag == '수정로그' ? '행 수정' : '수정로그'
+          this.lbl = this.lbl == '수정로그' ? '행 수정' : '수정로그'
+
+          console.log(this.this_.tableName, this.row.id)
+          if(this.cmdTag == '수정로그')
+            http({uri:"/api/v2/rowlog", method:"patch", param: {tableName: this.this_.tableName, id: this.row.id}, cb: (res) => {
+              this.rowlog = res.result
+            } })
+        },
+        fnRemoveEKey: function (e, cmd) {
+          if(e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+          if(/\D/g.test(e.key))
+          {
+            if(cmd == '실수' && e.key == '.') return
+            e.preventDefault()
+          }
+        }
+      },
+      template: `
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">행 선택</p>
+            <button
+                type="button"
+                class="delete"
+                @click="$emit('close')"></button>
+          </header>
+          <section v-if="cmdTag == '수정로그'" class="modal-card-body ctrl-row">
+            <div style="text-align: center;" v-for="row in rowlog">
+              <span style="float:left;">{{row.split(' 구분자 ')[2]}}</span>
+              {{row.split(' 구분자 ')[1]}}
+              <span style="float:right;">{{row.split(' 구분자 ')[0]}}</span>
+            </div>
+          </section>
+          <section v-else class="modal-card-body">
+            <div class="horizontal-scroll">
+              <!--<table class="table-modal">
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col" v-for="[k, v], i in Object.entries(row)" :style="minWidthCSS">{{k == 'metaTag' ? '이전연산' : k}}</th>
+                </tr>
+                <tr>
+                  <th scope="row"><span>현재</span></th>
+                  <td v-for="[k, v], i in Object.entries(row)">
+                    <b-icon v-if="_.isNil(v) || v == ''" icon="close"></b-icon>
+                    <span v-else-if="_.find(column.datetime, {field: k})">{{dayjs(v).format("YYYY-MM-DD")}}</span>
+                    <span v-else>{{v}}</span>
+                  </td>
+                <tr>
+              </table>
+              <table class="table-modal">
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col" v-for="[k, v], i in Object.entries(newRow)" :style="minWidthCSS">{{k == 'metaTag' ? '이전연산' : k}}</th>
+                </tr>
+                <tr>
+                  <th scope="row"><span>수정</span></th>
+                  <td v-for="[k, v], i in Object.entries(newRow)">
+                    <b-icon v-if="_.isNil(v) || v == ''" icon="close"></b-icon>
+                    <span v-else-if="_.find(column.datetime, {field: k})">{{dayjs(v).format("YYYY-MM-DD")}}</span>
+                    <span v-else>{{v}}</span>
+                  </td>
+                <tr>
+              </table>-->
+            </div>
+            <div class="mb20px"></div>
+            <div class="tile is-vertical" v-for="[k, v], i in Object.entries(newRow)">
+
+              <div class="tile is-vertical" :class="i < Object.keys(newRow).length - 1 ? 'mb20px' : ''" v-if="k != 'metaTag'">
+                <div class="mb">{{k}}</div>
+                <b-input v-if="_.find(column.multiline, {field: k})" type="textarea" v-model="newRow[k]" @keyup.native="cssHeight($event, newRow[k])"/>
+                <div v-else-if="_.find(column.datetime, {field: k})">
+                  <b-datepicker :v-model="newRow[k]" icon="calendar-today" locale="ko-KR" @input="fnDatePick(k, $event)"/>
+                </div>
+                <b-field v-else-if="_.find(column.integer, {field: k})" label="" type="is-success" message="정수를 입력하세요.">
+                  <b-numberinput v-model="newRow[k]" @keydown.native="fnRemoveEKey($event)"></b-numberinput>
+                </b-field>
+                <b-field v-else-if="_.find(column.number, {field: k})" label="" type="is-success" message="실수를 입력하세요.">
+                  <b-numberinput v-model="newRow[k]" @keydown.native="fnRemoveEKey($event, '실수')"></b-numberinput>
+                </b-field>
+                <b-input v-else v-model="newRow[k]" />
+                <div class="mt" style="border: 1px solid rgb(226, 208, 185);border-radius: 5px;background: rgb(255, 249, 228);padding: calc(.75em - 1px);">
+                  {{row[k]}}
+                </div>
+              </div>
+            </div>
+            <!--<b-table :data="[newRow]" :td-attrs="(column) => {align: 'right'}">
+              <b-table-column v-for="(column, index) in this_.columns[this_.tableName]" :key="index" :label="column.label" :visible="column.visible">
+                <template v-slot="props">
+                  <b-input v-model="props.row[column.field]">
+                </template>
+              </b-table-column>
+            </b-table>-->
+          </section>
+          <footer class="modal-card-foot" style="padding-bottom:2px">
+            <b-button
+                @click="this_.fnDelete(row);"
+                label="삭제" />
+            <div class="tile"></div>
+            <b-button
+                class="mr"
+                @click="toggleRowLog();"
+                :label="lbl" />
+            <b-button
+                @click="this_.fnUpdate(newRow);fnUpdate();"
+                label="수정" />
+          </footer>
+        </div>  
+      `,
+      created() {
+        
+      },
+      computed: {
+      }
+  }
+  const ShowModalForm = {
+      props: ['text', 'fontSize', 'sizeOf'],
+      methods: {
+        fnSizing: function(cmd) {
+          const list = ['is-small', '', 'is-medium', 'is-large']
+          if(cmd == '확대')
+            this.fontSize++
+          else
+            this.fontSize--
+          if(this.fontSize >= list.length) this.fontSize = list.length - 1
+          if(this.fontSize < 0) this.fontSize = 0
+          this.sizeOf = list[this.fontSize]
+          console.log(this.sizeOf)
+        }
+      },
+      template: `
+          <div class="modal-card">
+              <header class="modal-card-head">
+                <p class="modal-card-title">셀 내용 보기</p>
+                <button
+                    type="button"
+                    class="delete"
+                    @click="$emit('close')"/>
+              </header>
+              <section class="modal-card-body">
+                <b-input type="textarea" :size="sizeOf" v-model="text"/>
+              </section>
+              <footer class="modal-card-foot">
+                  <div class="tile">
+                    <b-button
+                        @click="fnSizing('확대')"
+                        label="글자크기 확대" />
+                    <div class="tile"></div>
+                    <b-button
+                        @click="fnSizing('축소')"
+                        label="축소" />
+                  </div>
+              </footer>
+          </div>
+      `,
+      created() {
+      }
+  }
+  const ModalJsonViewerForm = {
+      props: ['json', 'columns', 'currentPage'],
+      methods: {
+      },
+      template: `
+          <div class="modal-card">
+              <header class="modal-card-head">
+                <p class="modal-card-title">다중값 필드 셀 내용 보기</p>
+                <button
+                    type="button"
+                    class="delete"
+                    @click="$emit('close')"/>
+              </header>
+              <section class="modal-card-body">
+                <b-table :data="json" :columns="columns" :td-attrs="(column) => {align: 'left'}" focusable="focusable" :paginated="true" :per-page="10" :current-page.sync="currentPage"></b-table>
+                <div class="bg-lightblue p">10줄씩 표기됩니다.</div>
+              </section>
+              <footer class="modal-card-foot">
+                  <div class="tile">
+                    <div class="tile"></div>
+                    <b-button
+                        @click="$emit('close')"
+                        label="닫기" />
+                  </div>
+              </footer>
+          </div>
+      `,
+      created() {
+      }
+  }
+  const ModalHelpForm = {
+      props: ['this_'],
+      template: `
+        <div class="modal-card">
+          <header class="modal-card-head">
+          </header>
+          <section class="modal-card-body">
+            <div id="svg-res"></div>
+            <table id="help">
+                <thead> </thead>
+                <tbody>
+                    <tr>
+                        <td><a>메인</a></td>
+                    </tr>
+                    <tr class="highlight">
+                        <td><button class="functional mr">검색</button></td>
+                        <td style="vertical-align: middle;">
+                            <h3>검색2</h3>
+                        </td>
+                        <td><button class="functional mr">추가</button></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>모든 필드를 포함 조건으로 검색할 수 있고 입력하지 않은 필드 값은 제외됩니다. 필드와 필드를 AND, OR 조건으로 검색할 수 있습니다.</p>
+                        </td>
+                        <td>
+                            <p>이미 검색 버튼으로 불러온 데이터 내에서 추가 검색할 경우에는 필드명 바로 아래 텍스트 입력 박스를 이용합니다. </p>
+                        </td>
+                        <td>
+                            <p>추가를 한 번 클릭하고 데이터를 채워 넣고 다시 한 번 추가를 클릭합니다.</p>
+                        </td>
+                    </tr>
+                    <tr class="highlight">
+                        <td>
+                            <h3>수정</h3>
+                        </td>
+                        <td>
+                            <h3>정렬</h3>
+                        </td>
+                        <td>
+                            <h3>숨김</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>수정하고자 하는 행에서 마우스 오른쪽 버튼을 클릭합니다.</p>
+                        </td>
+                        <td>
+                            <p>필드명을 클릭하면 오름차순 또는 내림차순 정렬됩니다. 필드명을 복수개 선택하여 멀티 정렬을 할 수 있습니다.</p>
+                            <p>정렬 취소 버튼을 클릭하면 정렬이 취소되고 원본 데이터 순서로 변경됩니다.</p>
+                        </td>
+                        <td>
+                            <p>깔때기 모양의 맨 첫 열은 숨김 처리용 버튼입니다. 클릭하면 한 행이 숨김 처리됩니다.</p>
+                            <p>숨김 취소 버튼으로 모든 숨김을 취소할 수 있습니다.</p>
+                        </td>
+                    </tr>
+                    <tr class="highlight">
+                        <td><button class="functional mr">CSV 내보내기</button></td>
+                        <td><button class="functional mr">차트</button></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>엑셀로 변환합니다.</p>
+                        </td>
+                        <td>
+                            <p>복수 개의 숫자, 실수 컬럼 데이터를 차트로 시각화합니다.</p>
+                            <p>차트 그림은 이미지 파일, PDF로 다운 받을 수 있습니다.</p>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><a>테이블 관리</a></td>
+                    </tr>
+                    <tr class="highlight">
+                        <td>
+                            <h3>처음</h3>
+                        </td>
+                        <td>
+                            <h3>상단 테이블명 클릭시</h3>
+                        </td>
+                        <td>
+                            <h3>테이블 추가</h3>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>"로딩됨" 안내가 뜨면 정상입니다.</p>
+                        </td>
+                        <td>
+                            <p>각 필드별 필드명, 필드 타입, 수식, 표시여부를 추가, 수정, 삭제할 수 있습니다. </p>
+                            <p>삭제시 원본데이터는 보존되며 똑같은 이름의 필드를 다시 추가할 경우 복원됩니다.</p>
+                            <P>수식은 적산과 사칙연산만 제공합니다. <b-tag class="ml05" type="is-info">적산(필드명)</b-tag><span class="ml05">으로 입력하거나</span>
+                                <b-tag class="mr05" type="is-info">필드명 + 필드명</b-tag>
+                                <b-tag class="mr05" type="is-info">필드명 - 필드명</b-tag>
+                                <b-tag class="mr05" type="is-info">필드명 / 필드명</b-tag>
+                                <b-tag class="mr05" type="is-info">필드명 * 필드명</b-tag><span>으로 입력할 수 있습니다.</span>
+                            </P>
+                        </td>
+                        <td>
+                            <p>테이블명을 입력하면 필드가 없는 상태의 빈 테이블이 추가됩니다.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+          </section>
+          <footer class="modal-card-foot">
+              <div class="tile">
+                <b-button
+                    @click="this_.exportSvg('help')"
+                    label="이미지 파일로 다운로드" />
+                <div class="tile"></div>
+                <b-button
+                    @click="$emit('close')"
+                    label="닫기" />
+          </footer>
+        </div>
+      `
+  }  
+  const ModalChartForm = {
+      props: [],
+      methods: {
+      },
+      template: `
+        <div class="modal-card">
+            <header class="modal-card-head">
+              <p class="modal-card-title">차트 보기</p>
+              <button
+                  type="button"
+                  class="delete"
+                  @click=""/>
+            </header>
+            <section class="modal-card-body">
+              <div id="chart-area" style="height:50vh;"></div>
+            </section>
+            <footer class="modal-card-foot">
+                <div class="tile">
+                  <div class="tile"></div>
+                  <b-button
+                      @click="$emit('close')"
+                      label="닫기" />
+            </footer>
+        </div>
+      `,
+      created() {
+        console.log(this.sizeOf)
+      }
+  }  
+  let v = new Vue({
+      el: '#app',
+      components: {
+        ModalForm,
+        ShowModalForm,
+        ModalChartForm,
+        ModalHelpForm,
+        ModalJsonViewerForm
+      },
+      data: {
+        logoTitle: 'Many Stallings 매니스탈링스',
+        chart: null,
+        functionName: '조회',
+        tableName: '',
+        currentPage: 1,
+        formProps: '',
+        isControlModalActive: false,
+        isShowModalActive: false,
+        isShowModalChartActive: false,
+        isShowModalFindActive: false,
+        isShowModalJsonViewerActive: false,
+        isAddFormActive: false,
+        isShowModalHelpActive: false,
+        isClickedHideButton: false,
+        isChangeLogoTitle: false,
+
+        multiColumnSortingEnabled: true,
+        sortingPriority: [],
+        customKey: null,
+
+        select: {},
+        selectDo: {},
+        add: {},
+        maxId: {},
+        selectedRow: {},
+        columns: {},
+        datetimeOption: {
+          locale: undefined,
+          datepicker: undefined,
+          timepicker1: false,
+          timepicker2: undefined,
+        },
+        selectedColumns: [],
+        widthOfTableCell: undefined
+      },
+      methods: {
+        fnUpload: async function(f, row, field) {
+          alert("기능을 막아 두었습니다.")
+          return
+          console.log(f, row, field)
+          let blob = new Blob([await f.arrayBuffer()])
+          let formData = new FormData()
+          formData.set('userfile', blob, f.name)
+          
+          formData.set('tableName', this.tableName)
+          formData.set('row', JSON.stringify(row))
+          formData.set('field', field)
+
+          await axios.post("/api/v2/upload", formData, {
+              headers: {
+                  "Content-Type": "multipart/form-data"
+              }
+          }).then(res => {
+            row[field] = res.data.result.filename
+          })
+        },
+        fnInitChart: async function(columnName) {
+          //if(selectedColumns === false) return
+          //if(_.isNil(selectedColumns) || selectedColumns == '') return
+          if(!Array.isArray(this.selectedColumns)) return
+          if(_.isNil(this.tableName) || this.tableName == '') return
+          if(_.isNil(this.select[this.tableName]) || this.select[this.tableName].length === 0)
+            alert("조회를 하십시오.")
+          this.isShowModalChartActive = true
+          const series = this.selectedColumns.filter(column => !'일자날짜일시'.includes(column)).map(column => {return {name: column, data: []}})
+          const title = this.selectedColumns.join(', ')
+
+          const data = {
+            categories: [
+            ],
+            series: series
+          };
+          const options = {
+            chart: { title: title, width: 1000, height: 500 },
+            xAxis: {
+              title: 'Month',
+            },
+            yAxis: {
+              title: 'Amount',
+            },
+            tooltip: {
+              formatter: (value) => `${value}°C`,
+            },
+            legend: {
+              align: 'bottom',
+            },
+            series: {
+              selectable: true,
+              showDot: true,
+            }
+          };
+          if(!_.isNil(this.chart)) this.chart.destroy()
+          setTimeout(() => {
+            const el = document.getElementById('chart-area')
+            this.chart = toastui.Chart.lineChart({ el, data, options })
+            this.fnDrawChart(columnName)
+          }, 100)
+        },
+        fnDrawChart: function(columnName) {
+          //console.log(this.chart.getCheckedLegend())
+          //this.chart.unselectSeries()
+          setTimeout(() => {
+            let list
+            if(!_.isNil(this.selectDo[this.tableName]))
+              list = this.selectDo[this.tableName]
+            else if(Array.isArray(this.select[this.tableName]))
+              list = this.select[this.tableName]
+            else list = []
+            list.map(row => _.at(row, this.selectedColumns)).forEach((values, i) => {
+              this.chart.addData(values.filter(value => !(value instanceof Date)).map(value => _.toInteger(value)), values.filter(value => value instanceof Date).map(value => dayjs(value).format("MM/DD")))
+            })
+            //this.chart.addData(this.selectedColumns.map(value => 0), '마지막')
+            //this.chart.selectSeries({seriesIndex: 0, index: undefined})
+          }, 100)
+        },
+        fnLogout: function() {
+          http({uri:"/many-table/logout", method:"delete", param: {}, cb: (res) => {
+            console.log(res)
+          } })
+          this.columns[this.tableName].filter(field => field.type === '멀티라인').map(field => field.field) 
+        },
+        makeOneDummyRow: function(id, tableName) {
+          let row = {}
+          if(_.isNil(tableName)) tableName = this.tableName
+          for(const field of this.columns[tableName])
+            row[field.field] = ''
+          if(id)
+            row.id = id
+          delete row.null
+          return row
+        },
+        sortingPriorityRemoved(field){
+        },
+        fnSort: function(field, order, event) {
+          console.log(field, order, event)
+
+          /*let existingPriority = this.sortingPriority.filter(i => i.field === field)[0]
+          if(existingPriority) {
+            existingPriority.order = existingPriority.order === 'desc' ? 'asc' : 'desc'
+          } else {
+            this.sortingPriority.push({field, order})
+          }*/
+          function orderBy(data, conditionList)
+          {
+            console.log('conditionList', conditionList)
+            return data.sort((rowA, rowB) => {
+              for(const condition of conditionList)
+              {
+                if(condition.order == 'asc')
+                {
+                  if(rowA[condition.field] < rowB[condition.field]) return 1
+                  else if(rowA[condition.field] > rowB[condition.field]) return -1
+                }
+                else 
+                {
+                  if(rowA[condition.field] < rowB[condition.field]) return -1
+                  else if(rowA[condition.field] > rowB[condition.field]) return 1
+                }
+
+              }
+              return 0
+            })
+
+          }
+          function loadData(sortingPriority = []) {
+            //this.select[this.tableName] = orderBy(this.select[this.tableName], sortingPriority)
+            this.select[this.tableName] = []
+          }
+          loadData.bind(this)(this.sortingPriority)
+        },
+        fnUndo: function() {
+          this.selectDo[this.tableName] = null
+          this.$forceUpdate()
+        },
+        fnRedo: function(row) {
+          if(_.isNil(this.selectDo[this.tableName]))
+            this.selectDo[this.tableName] = _.cloneDeep(this.select[this.tableName])
+          for(let [i, e] of this.selectDo[this.tableName].entries())
+            if(e.id === row.id)
+            {
+              this.selectDo[this.tableName].splice(i, 1)
+              break
+            }
+          this.selectDo[this.tableName] = _.cloneDeep(this.selectDo[this.tableName])
+        },
+        fnFind: function () {
+          crud.fnFind('isShowModalFindActive')
+        },        
+        fnAdd: function () {
+          crud.fnAdd('isAddFormActive')
+        },
+        fnUpdate: function(newRow) {
+          crud.fnUpdate(newRow)
+        },
+        fnDelete: function(row) {
+          crud.fnDelete(row)
+        },
+        onControlRow: function(e, props) {
+          const propsRowRef = props.row // 필수. 이전 로우 레퍼런스 보존
+          props.row = fillFields.bind(this)(propsRowRef)
+          this.formProps = {propsRowRef: propsRowRef, row: props.row, newRow: _.cloneDeep(props.row), rowlog: '', this_: this,
+            column: {multiline: this.columns[this.tableName].filter(field => field.type === '멀티라인'),
+            datetime: this.columns[this.tableName].filter(field => field.type === '날짜'),
+            integer: this.columns[this.tableName].filter(field => field.type === '정수'),
+            number: this.columns[this.tableName].filter(field => field.type === '실수')},
+            cmdTag: '행 수정', lbl: '수정로그',
+            minWidthCSS: {'min-width': `${_.max(this.columns[this.tableName].map(field => field.label ? field.label.length : 0)) + 1}em`}
+            }
+
+          this.isControlModalActive = true          
+          e.preventDefault()
+        },
+        onShowMultilineText: function(text) {
+          this.formProps = {text: text, fontSize: 1, sizeOf: 1}
+          this.isShowModalActive = true
+        },
+        onShowHelp: function() {
+          this.formProps = {this_: this}
+          this.isShowModalHelpActive = true
+        },
+        onShowJsonViewer: function(json) {
+          if(Array.isArray(json))
+          {
+            this.formProps = {
+              json: json, 
+              columns: Object.keys(json[0]).map(field => {
+                return {field: field, label: field, width: undefined}
+              }), 
+              currentPage: 0
+            }
+            this.isShowModalJsonViewerActive = true
+          }
+        },
+        exportCSV: function() {
+          this.select[this.tableName].forEach((row, i, arr) => {
+            arr[i] = fillFields.bind(this)(row, '프린트')
+          })
+
+          exportTableToCSV(this.select[this.tableName], this.tableName)
+        },
+        exportSvg: function (id) {
+          const node = document.getElementById(id)
+          domtoimage.toSvg(node)
+            .then(function (dataUrl) {
+              const img = new Image()
+              img.src = dataUrl
+              document.getElementById('svg-res').appendChild(img)
+            })
+            .catch(function (error) {
+              console.error('oops, something went wrong!', error);
+            })
+        }
+      },
+      computed: {
+        isClickedButtonCSS: function() {
+          return (name) => {
+            if(this.tableName !== name) return {}
+            return {background: '#fff'}
+          }
+        },
+        isClickedFunctionalButtonCSS: function() {
+          return (name) => {
+            if(name == '숨김취소' && this.isClickedHideButton)
+              return {background: '#fff', color: '#222'}
+            if(this.functionName !== name) return {}
+            return {background: '#fff', color: '#222'}
+          }
+        },
+        isClickedHideButtonCSS: function() {
+          return this.isClickedHideButton ? {background: 'red'} : {}
+        },
+        fnCellCSS: function() {
+          return(metaTag) => {
+            if(_.isNil(metaTag)) return {}
+            switch(metaTag)
+            {
+              case '추가':
+                return {background: 'chartreuse'}
+
+              default: 
+                return {}
+            }
+          }
+        }
+      },
+      created()
+      {
+        crud.set(this)
+      },
+      mounted()
+      {
+        function makeColumns(str) {
+          let arr = []
+          for(let fieldAndLabel of str.split(','))
+          {
+            let field = fieldAndLabel.split(' ')[0]
+            let label = fieldAndLabel.split(' ')[1]
+            let visible = fieldAndLabel.endsWith('F') ? false : true
+
+            arr.push({field: field, label: label, visible: visible})
+          }
+          return arr
+        }
+        function init()
+        {
+          http({uri:"/api/v2/table-list", method:"patch", param: {}, cb: (res) => {
+            //res = {code, msg, result}
+            console.log("HTTP 응답", res)
+            if(res.code == 0)
+            {
+              this.columns = _.cloneDeep(res.result.columns)
+              console.log("컬럼들.", this.columns)
+
+              for(const tableName in this.columns)
+              {
+                for(let i = 0; i < 100; i++) this.columns[tableName].push({field:null, label:null, visible:false})
+                if(_.isNil(currentUser)) continue
+                if(!_.has(currentUser.permission, tableName)) continue
+                if(!currentUser.permission[tableName]) continue
+
+                this.select[tableName] = []
+                this.selectDo[tableName] = null
+                this.selectedRow[tableName] = {}
+                this.add[tableName] = [this.makeOneDummyRow(0, tableName)]
+                // 서버단으로 옮겨갈 로직
+                this.maxId[tableName] = 0
+              }
+              this.select = _.cloneDeep(this.select)
+              this.add = _.cloneDeep(this.add)
+              this.selectedRow = _.cloneDeep(this.selectedRow)
+              this.tableName = Object.keys(this.columns)[0]
+            }
+            else
+            {
+              //테이블 정보 불러오기 실패
+            }
+          } })
+
+          /*
+          http({uri:"/api/v2/basic-info", method:"patch", param: {}, cb: (res) => {
+            if(res.code == 0)
+              if(res.result.basic)
+                [this.logoTitle, this.logoImage, this.logoImageExt] = res.result.basic
+          }})*/
+
+        }
+        init.bind(this)()
+
+      }
+  })
+
+
+
+
+
+
+
+
+
+

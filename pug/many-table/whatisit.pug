@@ -1,0 +1,97 @@
+doctype html
+html.h100
+  head
+    meta(charset='utf-8')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/buefy.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/http.js")
+    script(type='text/javascript', src="/js/lodash.js")
+
+    link(rel='stylesheet', href='/css/font.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/buefy.css')
+    link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/materialdesignicons.min.css')
+
+    title Many Table
+
+    style.
+      .back {
+        perspective: 1000px;
+      }
+      .image {
+        transform-style: preserve-3d;
+      }
+      img {
+        animation: 3s infinite alternate bumb;
+      }
+      @keyframes bumb {
+        from {
+          opacity: 0.7;
+          transform: translateZ(-50px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateZ(0px);
+        }
+      }
+
+body.h100
+  #app.h100
+    header
+    main.p0.h100
+      .tile.h100
+        .tile.is-vertical.m-auto.w768.back
+          b-image.m-auto.front(src="/img/table_logo.svg" style="width: 75%;")
+          b-table(:data="contents" :td-attrs="(column) => {align: 'right'}" focusable)
+            b-table-column(field="소제목" width="200")
+              template(v-slot="props").
+                {{props.row['소제목']}}
+            b-table-column(field="본문" :width="undefined")
+              template(v-slot="props").
+                {{props.row['본문']}}
+      div(style="height: 3em;")
+
+    footer.tile.bg-gray1
+      .ib(style="width:3em;")
+      .tile.m-auto
+        .ib.m-auto.fs-content.ml.mr © 2023 Many Stallings.
+        button.flat.mr.ml 보안
+        button.flat.mr 사이트맵
+        button.flat 정책
+        button.flat 매니 테이블은 무엇인가요?
+      .tile
+        .ib.m-auto.fs-content.
+          This site is powered by...
+    
+
+script(type="text/javascript").
+  let remoteNode = "#{remoteNode}"
+  let v = new Vue({
+      el: '#app',
+      components: {
+      },
+      data: {
+        contents: [
+          {'소제목': '개발기간', '본문': '2022.12 ~ 2023'},
+          {'소제목': '라이선스', '본문': 'MIT'},
+          {'소제목': '매니 테이블은 무엇인가요?', '본문': 'Many Table은 테이블 구조 구현 소프트웨어입니다. 테이블 구조는 많은 산업에서 관리하는 프로그램으로 사용할 수 있습니다. 관리한다는 것은 단순히 경영지원 업무 뿐만 아니라 세부 프로세스 단위의 관리를 뜻합니다. 스프레드 시트에 익숙하다면, 쉽게 사용할 수 있습니다!'},
+        ],
+      },
+      methods: {
+      }
+  })
+
+
+
+
+
+
+
+
+
+

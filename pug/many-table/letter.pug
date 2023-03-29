@@ -1,0 +1,206 @@
+doctype html
+html()
+  head
+    meta(charset='utf-8')
+    script(type='text/javascript', src="/js/vue2611.js")
+    script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src='/js/html2canvas.js')
+    //script(type='text/javascript', src="/js/jspdf-latest.js")
+    script(type='text/javascript' src="/js/pdfmake.min.js")
+    script(type='text/javascript' src="/js/vfs_fonts.js")
+
+    //script(type='text/javascript', src="/js/font-base64.js")
+    //script(type='text/javascript', src="/js/font-bd-base64.js")
+    
+
+    title Json String Generator
+    style.
+
+        table, td, th {
+
+            border : 0.1px solid black;
+            border-collapse : collapse;
+        }
+        td:nth-child(1) {
+            width: 15%;
+        }
+        td:nth-child(2) {
+            width: 25%;
+        }
+        td:nth-child(3) {
+            width: 5%;
+        }
+        td:nth-child(4) {
+            width: 15%;
+        }
+        td:nth-child(5) {
+            width: 15%;
+        }
+        td:nth-child(6) {
+            width: 15%;
+        }
+        .ctr {
+            text-align: center;
+        }
+        .m1 {
+            display: inline-block;
+            width: calc(2em);
+        }
+        .m2 {
+            display: inline-block;
+            width: calc(1em / 2);
+        }
+        .flex {
+            display: flex;
+            flex-direction: column;
+        }
+        .signarea {
+            margin:auto;
+            font-size: 0.5em;
+        }
+body
+    #app
+        div(style="display:inline-block;width: 21cm;height:calc(29.7cm);" ref='printarea')
+            table
+                tbody
+                    tr
+                        td.ctr 문서번호
+                        td OL–2023-02
+                        td.ctr(rowspan="5")
+                            span 결
+                            div(style="height:calc(1.6em);")
+                            span 재
+                        td.ctr 담당
+                        td.ctr 부장
+                        td.ctr 본부장
+                    tr
+                        td.ctr 보존연도
+                        td 
+                        td.ctr(rowspan="3")
+                            span.signarea (인)
+                        td.ctr(rowspan="3")
+                            span.signarea (인)
+                        td.ctr(rowspan="3")
+                            span.signarea (인)
+                    tr
+                        td.ctr 기안일자
+                        td 
+                    tr
+                        td.ctr 기안부서
+                        td 
+                    tr
+                        td.ctr
+                            span 기
+                            span.m2
+                            span 안
+                            span.m2
+                            span 자
+                        td
+                        td.ctr /
+                        td.ctr /
+                        td.ctr /
+                    tr
+                        td.ctr
+                            span 수
+                            span.m1
+                            span 신
+                        td(colspan="5")
+                    tr
+                        td.ctr
+                            span 제
+                            span.m1
+                            span 목
+                        td(colspan="5")
+
+
+script(type="text/javascript").
+    function len(str)
+    {
+        if(str == undefined) return 0
+        if(str == null) return 0
+        if(str.hasOwnProperty('length')) return str.length
+        return 0
+    }
+    Array.prototype.isLast = function(obj) {
+        if(this[this.length - 1] === obj) return true 
+        return false
+    }
+    let v = new Vue({
+        el: '#app',
+        components: {
+        },
+        data: {
+            dummyText: '더미'
+        },
+        methods: {
+            onPrint: function () {
+                let win = window.open('', '_blank');
+
+                let dd = {
+                  content: [{
+                      stack: [
+                        {text: '품의협조요청서', style: 'title'},
+                        {
+                          style: 'tableHead',
+                          table: {
+                                    widths: ['15%', '35%', '5%', '15%', '15%', '15%'],
+                            body: [
+                              [{text: '문서번호', alignment: 'center'}, 'OL–2023-02', {rowSpan: 5, text: '결\n재', alignment: 'center'}, {text: '담당', alignment: 'center'}, {text: '과장', alignment: 'center'}, {text: '부장', alignment: 'center'}],
+                              [{text: '보존연도', alignment: 'center'}, '1년', '결재', {rowSpan: 3, text: ''}, {rowSpan: 3, text: ''}, {rowSpan: 3, text: ''}],
+                              [{text: '기안일자', alignment: 'center'}, '', '결재', '담당', '과장', '부장'],
+                              [{text: '기안부서', alignment: 'center'}, '', '결재', '담당', '과장', '부장'],
+                              [{text: '기안자', alignment: 'center'}, '', '결재', ' / ', ' / ', ' / '],
+                              [{text: '수신', alignment: 'center'}, {colSpan: 5, text: ''}]
+                              [{text: '제목', alignment: 'center'}, {colSpan: 5, text: ''}]
+                            ]
+                          }
+                        }
+                      ]
+                    //{text: 'lightHorizontalLines:', fontSize: 14, bold: true, margin: [0, 20, 0, 8]},
+
+                  }],
+                  styles: {
+                    title: {
+                      fontSize: 18,
+                      bold: true,
+                      alignment: 'center',
+                      margin: [0, 0, 0, 10]
+                    },
+                    tableHead: {
+                      margin: [0, 5, 0, 15]
+                    },
+                    tableBody: {
+                      bold: true,
+                      fontSize: 13,
+                      color: 'black'
+                    }
+                  },
+                  defaultStyle: {
+                    //alignment: 'justify'
+                  }
+                }                
+
+                pdfMake.createPdf(dd).open({}, win);
+            }
+        },
+        computed: {
+        },
+        created()
+        {
+
+        },
+        mounted()
+        {
+            this.onPrint()
+        }
+    })
+
+
+
+
+
+
+
+
+
+

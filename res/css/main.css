@@ -1,0 +1,419 @@
+html {
+  font-family: NS, BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+body {
+  color: black;
+}
+.b-span {
+  display: inline;
+  margin-right: 1em;
+}
+a {
+  padding: 0.8em;
+}
+a:hover {
+  background: #ddd !important;
+}
+hr {
+  border: none;
+  border-top: 1px solid rgb(127, 127, 136);
+  padding: 0;
+  margin: 0;
+}
+.lh {
+  line-height: 1.6em;
+}
+.message-mobile {
+  display: none;
+}
+body, button, input, select, textarea {
+  font-family: NS, BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+section.ctrl-row {
+  min-width: 100%;
+  width: max-content;
+}
+.table td, .table th {
+  padding: 0;
+}
+.b-table .table {
+  width: unset;
+}
+.table {
+  background-color: transparent;
+}
+table.table-modal {
+  border-collapse: collapse;
+  border: 2px solid rgb(200, 200, 200);
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+}
+table.table-modal:nth-child(1) {
+  border-bottom: 0;
+}
+table.table-modal:nth-child(2) {
+  border-top: 0;
+}
+table.table-modal td, th {
+  line-height: 1.7em;
+  border: 1px solid rgb(190, 190, 190);
+  padding: 3px;
+  text-align: center;
+}
+table.table-modal th[scope='col'] {
+  background-color: #696969;
+  color: #fff;
+}
+table.table-modal th[scope='row'] {
+  background-color: #d7d9f2;
+}
+table#help {
+  display: table;
+  width:100%;
+  height: 100vh;
+  table-layout:fixed;
+  word-break:break-all;
+  font-size: 1em;
+  border-collapse: collapse;
+}
+table#help td {
+  padding: 1em;
+  
+}
+table#help td p {
+  background: #eee;
+  padding: 0.5em;
+  border-radius: calc(12px - 0.001%);
+  margin: 0.5em;
+  margin-bottom: 0;
+  margin-right: 0;
+}
+table#help tr.highlight {
+  border: 3px solid #e0e0e0;
+}
+
+.message {
+  background-color: aliceblue;
+}
+.message-header {
+  background-color: unset;
+  color: #363636;
+}
+/* 모달 CSS */
+.modal .animation-content {
+  max-width: unset !important;
+}
+.modal-card, .modal-content {
+  width: 75vw;
+}
+/* 모달 CSS 끝 */
+
+.modal-card-foot {
+  padding: 0;
+  height: 3.1em;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.logo-place {
+  width: 100px;
+}
+.title-area h1::before{
+  content: "";
+  padding: 0 0.5em;
+  line-height: 1.5em;
+  border-left: 0.5em solid black;
+}
+.icon > i {
+  line-height: normal;  
+}
+h1 {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+h2 {
+  font-size: 1.1em;
+}
+.fs-content {
+  font-size: 0.8em;
+}
+.hin {
+  height: inherit;
+}
+.h100 {
+  height: 100%;
+}
+.h70 {
+  height: 7em;
+}
+.h50 {
+  height: 5em;
+}
+.h30 {
+  height: 3em;
+}
+.h25 {
+  height: 2.5em;
+}
+.h21 {
+  height: 2.1em;
+}
+.h20 {
+  height: 2.0em;
+}
+.h17 {
+  height: 1.7em;
+}
+.h10 {
+  height: 1.0em;
+}
+.w10 {
+  width: 1em;
+}
+.w768 {
+  max-width: 768px;
+}
+header {
+}
+main {
+  padding: 2em 100px;
+}
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2.5em;
+}
+.ib {
+  display: inline-block;
+}
+.ctr {
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+.right {
+  vertical-align: middle !important;
+  text-align: right !important
+}
+.m-auto {
+  margin: auto;
+}
+.m-t-auto {
+  margin-top: auto;
+}
+.m-l-auto {
+  margin-left: auto;
+}
+.ml-auto {
+  margin-left: auto;
+}
+.mr-auto {
+  margin-right: auto;
+}
+.m-r-auto {
+  margin-right: auto;
+}
+.m-lr-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.m-tb-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.m0 {
+  margin: 0;
+}
+.ml0 {
+  margin-left: 0;
+}
+.ml {
+  margin-left: 1em;
+}
+.mr {
+  margin-right: 1em;
+}
+.mt {
+  margin-top: 1em;
+}
+.mt5 {
+  margin-top: 5em;
+}
+.mb {
+  margin-bottom: 1em;
+}
+.ml05 {
+  margin-left: 0.5em;
+}
+.mr05 {
+  margin-right: 0.5em;
+}
+.mb20px {
+  margin-bottom: 20px;
+}
+.p {
+  padding: 1em;
+}
+.p-report {
+  padding: 2em 3em;
+}
+.ps {
+  padding: 0.3em
+}
+.p0 {
+  padding: 0;
+}
+.pl {
+  padding-left: 1em;
+}
+.pr {
+  padding-right: 1em;
+}
+.pt {
+  padding-top: 1em;
+}
+.p-lr {
+  padding: 0 1em;
+}
+.p02 {
+  padding: 0.2em;
+}
+.preview {
+  border-bottom: 3px outset #696969;
+  border-right: 3px outset #696969;
+  border-top: 3px inset #eee;
+  border-left: 3px inset #eee;
+  background: #696969;
+
+}
+.menu-report {
+  padding: 1em 3em;
+}
+.menu-li {
+  height: 100%;
+  width: auto;
+  display: flex;
+}
+.overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bg-gray1 {
+  background: #eee;
+}
+.bg-gray2 {
+  background: #ddd;
+}
+.bg-gray3 {
+  background: #ccc;
+}
+.bg-lightblue {
+  background: rgb(223, 222, 255);
+}
+.bg-help {
+  background: #ffe;
+}
+.border {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+}
+.noborder {
+  border-width: 0;
+}
+.cursor {
+  cursor: pointer;
+}
+.h-center {
+  align-items: center;  
+}
+.sb {
+  justify-content: space-between
+}
+.toastui-chart-export-menu {
+  display: block;
+  position: static;
+}
+.upload {
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 0;
+}
+.upload:hover {
+  color:rgb(163, 163, 241)
+}
+.table a {
+  padding: 0;
+}
+.table a:hover {
+  background: transparent !important;
+  color:rgb(163, 163, 241)
+}
+.left-blank {
+  width: 100px;
+}
+.color-gray {
+  color: gray;
+}
+.b-checkbox.checkbox input[type=checkbox]+.check {
+  border-radius: 50%;
+  padding: 0.7em;
+}
+.flex-auto {
+  flex: 0 0 auto;
+}
+
+@media screen and (max-width: 900px) {
+  main {
+    padding: 5vw;
+    margin-bottom: 5em;
+  }
+  main.front {
+    padding: 5vw;
+  }
+  .tile {
+    display: flex;
+    max-width: 100vw;
+  }
+  .menu-li {
+    flex-direction: column;
+  }
+  .message-mobile {
+    display: block;
+  }
+  .github {
+    display: none;
+  }
+  .left-blank {
+    display: none;
+  }
+  .form-label {
+    display: none;
+  }
+  .modal-card, .modal-content {
+    width: 100vw;
+  }
+  .login-box {
+    width: 90vw;
+  }
+  .b-table .table-wrapper.has-mobile-cards tr:not([class*=is-]) {
+      background: inherit;
+      width: 90vw;
+      margin: 5vw 0;
+  }
+  .logo {
+    display: none;
+  }
+  h1 {
+    display: none;
+  }
+  .message-desktop {
+    width: 200px;
+    display: none;
+  }
+  .desktop {
+    display: none;
+  }
+
+}

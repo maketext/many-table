@@ -1,7 +1,11 @@
 # many-table
-Sheet solution for small businesses
+Sheet solution for small businesses.
 
 This is an introduction to the many-table under development.
+
+Help for this source code will be congratulated.
+Please participate a modify source code and development a lot.
+
 
 ## Login
 The login account information is determined during the test phase.

@@ -9,6 +9,8 @@ Help for this source code will be congratulated.
 Please participate in modifying source code and development a lot.
 
 
+And can use with Commercial Use. Many Stallings Company will do.
+
 ## Login
 The login account information is determined during the test phase.
 

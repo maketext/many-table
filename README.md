@@ -4,7 +4,9 @@ Sheet solution for small businesses.
 This is an introduction to the many-table under development.
 
 Help for this source code will be congratulated.
-Please participate a modify source code and development a lot.
+
+
+Please participate in modifying source code and development a lot.
 
 
 ## Login

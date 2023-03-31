@@ -41,7 +41,7 @@ const db = new Level('many', { valueEncoding: 'json' })
 let baseURL = '127.0.0.1'
 const port = 8888
 
-//const maxId = {'테이블1': 100} // 임시
+//const maxId = {'테이블1': 100} // 임시 Temporary
 const maxId = {}
 const envMap = {
 	'직원명부': '직원 명부'
@@ -124,11 +124,15 @@ const tokenMap = {}
 
 /**
  * @function
- * 같은 파일 이름을 가진 파일을 동시에 업로드 할 경우, 중복하지 않는 원본 파일 이름으로 관리하려고 합니다. 
+ * If it uploads a file as a same file name at the same time, we want to manage it with a unique original file name.
+ * Creates a prefix of the file name that applies to the file upload module, multer. For example, when you upload three consecutive identical files on February 8, 2023, at 21:56,
+ * return the prefix "1-230208-2156", "2-230208-2156", and "3-230208-2156" in order.
+ * 
+ * 같은 파일 이름을 가진 파일을 동시에 업로드 할 경우, 중복하지 않는 원본 파일 이름으로 관리하려고 합니다.
  * multer 파일 업로드 모듈에 적용되는 파일이름의 접두어를 생성합니다. 2023년 02월 08일 21시 56분에 연속해서 3개의 같은 파일을 업로드 했을 때,
  * 차례로 '1-230208-2156', '2-230208-2156', '3-230208-2156' 접두어를 리턴합니다.
- * @param {string} filename - multer 파일 업로드 모듈에서 읽어들인 원본 파일 이름
- * @returns 중복하지 않은 접두어 문자열
+ * @param {string} filename - original file name read from multer file upload module. multer 파일 업로드 모듈에서 읽어들인 원본 파일 이름.
+ * @returns Non-duplicated prefix string. 중복하지 않은 접두어 문자열.
  */
 function multerFilenamePreFix(filename) {
 	if(!_.has(multerFilenamePrefixMap, filename))
@@ -144,8 +148,11 @@ function multerFilenamePreFix(filename) {
 
 /**
  * @function
- * 파일 이름 접두어 맵 자료규조를 클린합니다. 키는 n-YYMMDD-HHmm 형태로 함수가 호출되는 현재 시각 보다 1분 전과 그 이전 값을 의미하는 키 데이터들을 전부 삭제합니다.
- * @returns 없음
+ * Clean the file name prefix map data structure.
+ * Erase all key data in the form n-YYYMMDD-HHmm, meaning a value one minute before the current time and before that value, at which the function is called. 
+ * 
+ * 파일 이름 접두어 맵 자료구조를 클린합니다. 키는 n-YYMMDD-HHmm 형태로 함수가 호출되는 현재 시각 보다 1분 전과 그 이전 값을 의미하는 키 데이터들을 전부 삭제합니다.
+ * @returns 없음 None
  */
 function multerCleanPrefixMap() {
 	function isPast(str)
@@ -162,7 +169,7 @@ const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		multerCleanPrefixMap()
 		if(file.fieldname == 'userfile')
-			cb(null, '../res/files') // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+			cb(null, '../res/files') // Set saving storage directory of file sent through cb callback function. cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정.
 	},
 	filename: function (req, file, cb) {
 		file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8')
@@ -218,10 +225,12 @@ const upload = multer({
 })
 
 /**
- * 현재 세션이 인가되었는지 여부를 리턴
+ * Return whether the current session is authorized
+ * 
+ * 현재 세션이 인가되었는지 여부를 리턴 
  * @function
- * @param {import('express').Request} req - Express.js 요청 객체 
- * @returns 현재 유저가 로그아웃 상태 시 true, 로그인 시 false
+ * @param {import('express').Request} req - Express.js Request Object. Express.js 요청 객체.
+ * @returns True when the current user is logged out, false when logged in. 현재 유저가 로그아웃 상태 시 true, 로그인 시 false.
  */
 function hasNotUser(req) {
 
@@ -242,14 +251,18 @@ function hasNotUser(req) {
 }
 
 /**
+ * If the JavaScript expression of the ifTrue parameter value is true, issue a Remember Me token.
+ * The format of the token value is 'MMS' + YYMMDD + ('20'|'1d'|'un') + randomString.
+ * Draft: It is true that Semantic information remains within the Remember Me token value. So implement the logic converting to JWT tokens
+ * 
  * ifTrue 파라미터 값의 자바스크립트 표현식이 true이면 리멤버 미 토큰을 발행한다. 토큰 값의 포멧은 'MMS' + YYMMDD + ('20'|'1d'|'un') + randomString 이다.
  * 초안 : 리멤버 미 토큰 값 내에 시멘틱 정보가 남아 있어 JWT 토큰으로 변환하는 로직 구현
  * @function
- * @param {boolean} ifTrue - 토큰 발행 여부
- * @param {import('express').Request} req - Express.js 요청 객체
- * @param {import('express').Response} res - Express.js 응답 객체
- * @param {import('express').NextFunction} next - Express.js next 함수값 
- * @returns 없음
+ * @param {boolean} ifTrue - Whether to issue a token is issued. 토큰 발행 여부.
+ * @param {import('express').Request} req - Express.js Request Object. Express.js 요청 객체.
+ * @param {import('express').Response} res - Express.js Response Object. Express.js 응답 객체.
+ * @param {import('express').NextFunction} next - Express.js next function value. Express.js next 함수값.
+ * @returns None. 없음.
  */
 function issueTokenWhen(ifTrue, req, res, next) {
 	if(ifTrue)
@@ -271,12 +284,15 @@ function issueTokenWhen(ifTrue, req, res, next) {
 }
 
 /**
+ * Reissue the Remember Me token according to the cookie value.
+ * If the value of the remember_me cookie does not exist, or if validation has failed (junk RememberMe), or if an already authorized session is alive, then the current function is ignored.
+ * 
  * 쿠키 값에 따라 리멤버 미 토큰을 재발행한다. remember_me 쿠키 값이 없거나 유효성 검증에 실패한 경우 (정크 리멤버 미) 또는 이미 인가된 세션이 살아 있는 경우는 현재 함수를 무시한다.
  * @async
  * @function
- * @param {import('express').Request} req - Express.js 요청 객체 
- * @param {import('express').Response} res - Express.js 응답 객체 
- * @param {import('express').NextFunction} next - Express.js next 함수값
+ * @param {import('express').Request} req - Express.js Request Object. Express.js 요청 객체.
+ * @param {import('express').Response} res - Express.js Response Object. Express.js 응답 객체.
+ * @param {import('express').NextFunction} next - Express.js next function value. Express.js next 함수값.
  * @returns 없음
  */
 async function loginWithRememberMe(req, res, next) {
@@ -295,18 +311,18 @@ async function loginWithRememberMe(req, res, next) {
 		return false
 	}
 	async function getUserFromRememberMeToken() {
-		//리멤버미 쿠기값 없음
+		// There is no Remember Me Cookie Value. 리멤버미 쿠기값 없음.
 		if(!req.cookies.remember_me) return undefined
-		// 쿠키 유효성 검사 실패시
+		// When Cookie validation fails... 쿠키 유효성 검사 실패시...
 		if(!authRememberMeToken(req.cookies.remember_me)) return undefined
 		const username = await consumeRememberMeToken(req.cookies.remember_me)
 		console.log("// 리멤버미 소비")
-		//undefiend를 리턴할 경우 정크 리멤버미
+		// If you return undefiend, it is junk reminder me. undefiend를 리턴할 경우 정크 리멤버미이다.
 		return await findSomeBySome('user', username)
 	}
 	console.log("hasNotUser(req)", hasNotUser(req))
 	console.log("req.isAuth=", req.isAuthenticated())
-	if(!hasNotUser(req)) return next() // 이미 로그인 한 세션의 경우 현 함수를 무시한다.
+	if(!hasNotUser(req)) return next() // Case of session already logged in, ignore the current function.	이미 로그인 한 세션의 경우 현 함수를 무시한다.
 	let user = await getUserFromRememberMeToken()
 	console.log('user', user)
 	if(!_.isNil(user))
@@ -316,13 +332,13 @@ async function loginWithRememberMe(req, res, next) {
 			if (err) next(err)
 			else
 			{
-				// 리멤버미 토큰 갱신
+				// Renew Remember Me Token. 리멤버미 토큰 갱신.
 				issueTokenWhen(req.cookies.remember_me === 'un', req, res, next)
 				req.user.remember_me = req.cookies.remember_me
 			}
 		})
 	}
-	else next()  //정크 리멤버 미 또는 리멤버 미 쿠기값 없음
+	else next()  //Junk Remember Me or No Remember Me Cookie Value.	정크 리멤버 미 또는 리멤버 미 쿠기값 없음.
 }
 
 /*
@@ -343,10 +359,10 @@ app.use(cors(corsObject))
 
 const secretList = ['ad6e89cc744a5fa5a23e3d9a4f07e999', '60393f2bcf92a4f87f1ddf6289b331cb', '12982ef42691544736f28d204aa0644d', 'd61752f13a4dc72c45e5c6f45fc0788d', 'dd1568dcb3ee3217ab0ca6664eff09bc', '6be01056887af61b8c8f00ae5a72f01a']
 const activeUsers = {count: 0}
-app.use(compression()) // 역방향 프록시에서 제어가능하므로 nginx 사용시 제거.
+app.use(compression()) // Removed when using nginx because it can be controlled by reverse proxy. 역방향 프록시에서 제어가능하므로 nginx 사용시 제거.
 app.use(express.static(path.join(__dirname, '..', 'res')))
-app.use(cookieParser()); // passport-remember-me 사용시 필수 Cannot read properties of undefined (reading 'remember_me')
-app.use(bodyParser.urlencoded({ extended: true })) // form 양식 전송시 중요!
+app.use(cookieParser()); // Required when using passport-remember-me and corresponds to "Cannot read properties of undefined (reading 'remember_me') error. "Cannot read properties of undefined (reading 'remember_me')" 에러에 대응하며 passport-remember-me 사용시 필수.
+app.use(bodyParser.urlencoded({ extended: true })) // Important when sending form! form 양식 전송시 중요!
 app.use(bodyParser.json())
 app.use(session({
   secret: secretList,
@@ -363,14 +379,14 @@ app.use((req, res, next) => {
 	res.on("finish", function() {
 		log("응답메시지 전송됨.")
 	})
-	// 직렬화/역직렬화, 캐싱확인용 컴포넌트 들어갈 자리.
+	// Where to typing Serialization/Deserialization, components for caching verification. 직렬화/역직렬화, 캐싱확인용 컴포넌트 들어갈 자리.
 	res.append('Cache-Control', 'max-age=5')
 	next()
 })
 app.use(passport.initialize())
 app.use(passport.session())
 
-//테스트용 유저 정보
+//User information for testing. 테스트용 유저 정보.
 db.put('user', {
 	admin2: {username: 'admin2', name: '애덤', password: 'apple111apple111', remember_me: false, permission: {}}
 }).then(() => {
@@ -378,7 +394,7 @@ db.put('user', {
 	})
 	
 
-// 로그인 검증 전략
+// Login Validation Strategy. 로그인 검증 전략.
 passport.use(new LocalStrategy({
 	usernameField: 'username',
 	passwordField: 'password'
@@ -408,11 +424,13 @@ passport.use(new LocalStrategy({
 }));
 
 /**
+ * Read and delete Remember Me token (consumption)
+ * 
  * 리멤버 미 토큰 읽고 삭제 (소비)
  * @async
  * @function
- * @param {string} tokenKey - 리멤버 미 토큰 값
- * @returns 없음
+ * @param {string} tokenKey - Remember Me Token Value. 리멤버 미 토큰 값.
+ * @returns 없음 None
  */
 async function consumeRememberMeToken(tokenKey) {
 	
@@ -428,17 +446,21 @@ async function consumeRememberMeToken(tokenKey) {
 }
 
 /**
+ * Persistently save the information pair of (Remember Me token, username).
+ * 
  * (리멤버 미 토큰, username) 쌍 정보를 영구 저장한다.
  * @async
  * @function
- * @param {string} tokenKey - 리멤버 미 토큰 값
- * @param {string} tokenValue - username 값
+ * @param {string} tokenKey - Remember Me Token Value. 리멤버 미 토큰 값.
+ * @param {string} tokenValue - username value. username 값.
  */
 async function saveRememberMeToken(tokenKey, tokenValue) {
   await db.put(`rememberme-${tokenKey}`, tokenValue)
 }
 
 /**
+ * Find information (Remember Me token, username) by inputting the Remember Me token value.
+ * 
  * 리멤버 미 토큰 값으로 (리멤버 미 토큰, username) 정보를 찾는다.
  * @async
  * @function
@@ -465,7 +487,7 @@ async function querySome(table, tableName, query, condition)
 	let cnt, result = []
 	let len = Object.keys(query).length
 
-	// 오브젝트 클리닝 Object Cleaning
+	// Object Cleaning. 오브젝트 클리닝.
 	_.forOwn(query, (value, key) => {
 		if(value === '' || _.isNil(value)) delete query[key]
 	})
@@ -567,7 +589,7 @@ app.all('/many-table/login', loginWithRememberMe, async (req, res, next) => {
 		res.redirect('/many-table/front')
 })
 
-// 스테틱 페이지
+// Static page. 스테틱 페이지.
 app.get(['/many-table/report', '/many-table/letter', '/many-table/login', '/many-table/sign-up-begin', '/many-table/testing/json', '/many-table/testing/help', '/many-table/sign-up-promise', '/many-table/sign-up', '/many-table/sign-up-end'], (req, res, next) => {
 	console.log('res.locals.flash', res.locals.flash)
 	if(req.path === '/many-table/report')
@@ -577,16 +599,17 @@ app.get(['/many-table/report', '/many-table/letter', '/many-table/login', '/many
 	res.locals.canRendered = 1
 })
 
-// 로그인 전용 페이지 시작
-// 로그인 여부 확인 횡단 관심사
+// Starts to the login only page. 로그인 전용 페이지 시작.
+// Cross-cutting Concern to verify login. 로그인 여부 확인용 횡단 관심사.
 app.get(['/many-table/front', '/many-table/new-table', '/many-table/permission', '/many-table/whatisit'], (req, res, next) => {
 	if(hasNotUser(req))
 		res.redirect('/many-table/error')
 	else
 		next()
 })
-// 로그인 전용 페이지 라우팅
+// Login-only page routing. 로그인 전용 페이지 라우팅.
 app.get(['/many-table/sign'], (req, res, next) => {
+	//Example of a req.user object {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
 	//req.user 객체 예시 {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
 	res.render(req.url.substr(1), {username: req.user.username, name: req.user.name, tableName: Buffer.from(JSON.stringify({'결제': '결제', '직원명부': '직원명부'}), "utf8").toString('base64url')})
 	
@@ -621,9 +644,10 @@ app.get('/many-table/front', async (req, res, next) => {
 	}
 })
 // 끝
+// End
 
 
-/* 테스트 용
+/* for Test. 테스트 용.
 app.get(['/many-table/testing/chart'], (req, res, next) => {
 	res.render(req.url.substr(1))
 	res.locals.canRendered = 1
@@ -638,7 +662,7 @@ app.get(['/many-table/testing/rowlog'], (req, res, next) => {
 	next()
 })*/
 
-// 회사 공식 홈페이지 라우팅
+// Routing the Many Stallings Company's official website. 회사 공식 홈페이지 라우팅.
 app.get(['/'], (req, res, next) => {
 	let md = new MobileDetect(req.headers['user-agent']);
 	res.setHeader('Page-Type', 'text/html')
@@ -660,7 +684,9 @@ app.get(['/terms/wordnote'], (req, res, next) => {
 	res.render('terms/wordnote', {})
 	res.locals.canRendered = 1
 })
+// Home page routing ends
 // 홈페이지 라우팅 끝
+
 
 
 app.post('/many-table/login',
@@ -716,7 +742,7 @@ function getMaxId() {
 
 }
 
-// 유저 로그인 여부 및 권한 평가
+// Evaluate whether or not a user is logged in and having permissions. 유저 로그인 여부 및 권한 평가.
 app.all('/api/v2*', loginWithRememberMe, async (req, res, next) => {
 	if(hasNotUser(req))
 		res.status(404).send('응답이 없습니다.')
@@ -791,6 +817,8 @@ function saveTableOne(table, row) {
 }
 
 /**
+ * Add Table Row
+ * 
  * 테이블 로우 추가
  * @event
  * @param {METHOD} method - POST
@@ -816,29 +844,31 @@ app.post('/api/v2/', async (req, res, next) => {
 })
 
 /**
+ * Table low lookup (PATCH), modification (PUT), deletion (DELETE)
+ * 
  * 테이블 로우 조회(PATCH), 수정(PUT), 삭제(DELETE)
  * @event
  * @param {METHOD} method - ALL METHOD (PATCH, PUT, DELETE)
  * @param {URL} url - /api/v2
- * @param {RequestBody} tableName - string - 테이블 이름 (PATCH, PUT only)
- * @param {RequestBody} condition - string - '그리고 포함', '또는 포함' (PATCH only)
- * @param {RequestBody} query - JSONObject - 조건 검색 쿼리 (PATCH only)
- * @param {RequestBody} row - JSONObject - 수정할 로우 객체 (PUT only)
- * @param {Querystring} a - string - 테이블 이름 (DELETE only) 
- * @param {Querystring} b - string - 로우 id 값 (DELETE only)
+ * @param {RequestBody} tableName - string - 테이블 이름 (PATCH, PUT only). Table Name (PATCH, PUT only).
+ * @param {RequestBody} condition - string - '그리고 포함', '또는 포함' (PATCH only). "And include", "or include" (PATCH only).
+ * @param {RequestBody} query - JSONObject - 조건 검색 쿼리 (PATCH only). Query of searching (PATCH only).
+ * @param {RequestBody} row - JSONObject - 수정할 로우 객체 (PUT only). Row object to modify (PUT only).
+ * @param {Querystring} a - string - 테이블 이름 (DELETE only). Table Name (DELETE only).
+ * @param {Querystring} b - string - 로우 id 값 (DELETE only). Low id value (DELETE only).
  */
 app.all('/api/v2/', async (req, res, next) => {
 	console.log('METHOD', req.method)
 	if(!(req.method == 'PATCH' || req.method == 'PUT' || req.method == 'DELETE')) return next()
 
 
-	// 조회 기능 프로그래밍
+	// Programming lookup functioning. 조회 기능 프로그래밍
 	try {
 		const table = await findSome(`table-${req.body.tableName ? req.body.tableName : req.query.a}`)
 		//console.log('table', table)
 		if(table === undefined)
 		{
-			// 테이블이 비었습니다. 테이블 신규시 비어있음.
+			// The table is empty. Empty when table is new. 테이블이 비었습니다. 테이블 신규시 비어있음.
 			res.send({code: 1, result: '테이블이 비었습니다.'})
 			next()
 			return
@@ -848,9 +878,9 @@ app.all('/api/v2/', async (req, res, next) => {
 		{
 			case 'PATCH':
 			{
-				if(_.has(req.body, 'query')) // 조건 검색
+				if(_.has(req.body, 'query')) // Search for conditions. 조건 검색.
 					result = await querySome(table, req.body.tableName, req.body.query, req.body.condition)
-				else // ID 검색
+				else // Search for ID. ID 검색.
 					req.body.rowIds.forEach(id => {
 						const row = transactionTableRowOne('읽기', table, {id: id})
 						delete row['null']
@@ -860,7 +890,7 @@ app.all('/api/v2/', async (req, res, next) => {
 				res.send({code: 0, result: result})
 				break
 			}
-			case 'PUT': // 수정
+			case 'PUT': // modification. 수정.
 			{
 				delete req.body.row['null']
 				console.log('대체할 로우', req.body.row)
@@ -889,6 +919,9 @@ app.all('/api/v2/', async (req, res, next) => {
 })
 
 /**
+ * Write a table list.
+ * Persistent saving of the entire table list object reflecting the modifications as input.
+ * 
  * 테이블 리스트 쓰기. 수정사항을 반영한 전체 테이블 리스트 객체를 입력으로 받아 영구 저장.
  * @event
  * @param {METHOD} method - POST
@@ -904,6 +937,8 @@ app.post('/api/v2/table-list/', async (req, res, next) => {
 })
 
 /**
+ * Reading table lists.
+ * 
  * 테이블 리스트 읽기.
  * @event
  * @param {METHOD} method - PATCH
@@ -916,7 +951,7 @@ app.patch('/api/v2/table-list/', async (req, res, next) => {
 			//console.log(columns)
 			if(_.has(req.body, 'tableName'))
 			{
-				// 오브젝트에서 특정 키-값 쌍을 추출해 낼 때 로데시의 pick 함수를 사용
+				// Use the pick function in lodash.js Library to extract a specific key-value pair from an object. 오브젝트에서 특정 키-값 쌍을 추출해 낼 때 로데시의 pick 함수를 사용.
 				if(Array.isArray(req.body.tableName))
 					res.send({code: 0, result: {columns: _.pick(columns, req.body.tableName) }})
 				else
@@ -931,7 +966,7 @@ app.patch('/api/v2/table-list/', async (req, res, next) => {
 		})
 		.catch(err => res.send(getMessage('읽기오류')))
 		.finally(() => next())
-	/* 응답 예시
+	/* Example of a response. 응답 예시.
 		{
 			'테이블1': [
 				{ field: '필드1', label: '필드1', visible: true, type: '멀티라인' },
@@ -944,6 +979,8 @@ app.patch('/api/v2/table-list/', async (req, res, next) => {
 })
 
 /**
+ * Draft: Writing basic information. Logo title, logo image, etc
+ * 
  * 초안 : 기본 정보 쓰기. 로고 타이틀, 로고 이미지 등
  * @event
  * @param {METHOD} method - POST
@@ -959,6 +996,8 @@ app.post('/api/v2/basic-info/', async (req, res, next) => {
 })
 
 /**
+ * Draft: Read basic information. Logo title, logo image, etc
+ * 
  * 초안 : 기본 정보 읽기. 로고 타이틀, 로고 이미지 등
  * @event
  * @param {METHOD} method - PATCH
@@ -977,18 +1016,6 @@ app.patch('/api/v2/basic-info/', async (req, res, next) => {
 		.finally(() => next())
 })
 
-/**
- * 초안 : 기본 정보 읽기. 로고 타이틀, 로고 이미지 등
- * @event
- * @param {METHOD} method - PATCH
- * @param {URL} url - /api/v2/user-list
- * @param {ResponseBody} basic - JSONObject
- * {
- * 	'logoTitle':?,
- * 	'logoImage':?,
- * 	'logoImageExt':?
- * }
- */
 app.patch('/api/v2/user-list/', async (req, res, next) => {
 	findSome('user')
 		.then(user => res.send({code: 0, result: {user: user }}))
@@ -1010,7 +1037,7 @@ app.patch('/api/v2/rowlog/', async (req, res, next) => {
 		.finally(() => next())
 })
 
-/* multer 파일 다운로드 */
+/* multer file download. multer 파일 다운로드. */
 app.get(['/api/v2/file-list/download', '/api/v2/file-list/download/:filetoken'], async (req, res, next) => {
 	await createIfNot('files', {})
 
@@ -1034,7 +1061,7 @@ app.get(['/api/v2/file-list/download', '/api/v2/file-list/download/:filetoken'],
 	})
 })
 
-/* 파일 업로드 
+/* Uploading a file. 파일 업로드.
 app.post('/api/v2/upload', upload.fields([{name:'userfile'}, {name:'row'}, {name:'field'}, {name:'tableName'}]), async (req, res, next) => {
 	const file = req.files.userfile[0]
 	console.log("여기 field", req.body.field)

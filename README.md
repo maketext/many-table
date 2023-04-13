@@ -17,13 +17,11 @@ And can use with Commercial Use. Many Stallings Company will do.
 
 - We introduced Map-based Variable structure for productivity.
 
-`
+```javascript
 const va = {}
-
 va['Variable name 1'] = 100
-
 va['Variable name 2'] = '200'
-`
+```
 
 ## Login
 The login account information is determined during the test phase.

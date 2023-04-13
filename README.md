@@ -15,6 +15,8 @@ And can use with Commercial Use. Many Stallings Company will do.
 - Our coding guide includes full using lodash Library.
   - [https://lodash.com](https://lodash.com)
 
+- We introduced Map-based Variable structure for productivity.
+
 ## Login
 The login account information is determined during the test phase.
 

@@ -1,13 +1,7 @@
 # many-table
-Sheet solution for small businesses.
-
 This is an introduction to the many-table under development.
 
-Help for this source code will be congratulated.
-
-
 Please participate in modifying source code and development a lot.
-
 
 And can use with Commercial Use. Many Stallings Company will do.
 

@@ -25,6 +25,8 @@ va['Variable name 2'] = '200'
 
 - We develop pure process of "remember-me" token functionality, and not using passport-remember-me based one, because of internal error.
 
+- This Library use Database System (Google LevelDB) and another one, MongoDB based one will be introduced by dual. 
+
 ## Login
 The login account information is determined during the test phase.
 

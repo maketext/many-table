@@ -23,6 +23,8 @@ va['Variable name 1'] = 100
 va['Variable name 2'] = '200'
 ```
 
+- We develop pure process of "remember-me" token functionality, and not using passport-remember-me based one, because of internal error.
+
 ## Login
 The login account information is determined during the test phase.
 

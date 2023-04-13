@@ -19,7 +19,9 @@ And can use with Commercial Use. Many Stallings Company will do.
 
 `
 const va = {}
+
 va['Variable name 1'] = 100
+
 va['Variable name 2'] = '200'
 `
 

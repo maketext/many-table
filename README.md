@@ -1,7 +1,7 @@
 # many-table
 This is an introduction to the many-table under development.
 
-Please participate in modifying source code and development a lot.
+Please participate in modifying source code and development a lot. Contact us [https://plusuniv.com](https://plusuniv.com)
 
 And can use with Commercial Use. Many Stallings Company will do.
 

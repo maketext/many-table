@@ -7,10 +7,14 @@ And can use with Commercial Use. Many Stallings Company will do.
 
 ---
 
-We now develop "digital signature on published report" part using node-rsa Library.
+- We now develop "digital signature on published report" part using node-rsa Library.
 
-### node-rsa
+-- node-rsa
 [https://github.com/rzcoder/node-rsa](https://github.com/rzcoder/node-rsa)
+
+- Our coding guide includes full using lodash Library.
+
+
 
 
 ## Login

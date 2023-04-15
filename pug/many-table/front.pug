@@ -59,39 +59,42 @@ html()
 body
   #app
     header
+      // 공통 헤더
       .tile.h50
+        .tile.is-3
         .tile.logo-place(style="flex: 0 0 auto;")
           .ib.m-auto.ml.mr.left-blank
             b-image.logo(src="/img/logo.svg")
         button.flat(@click="isChangeLogoTitle = true;setTimeout(() => $refs.changeLogoTitle.focus(), 100);")
           b-input.m-tb-auto(ref="changeLogoTitle" v-if="isChangeLogoTitle" @keyup.native.enter="isChangeLogoTitle = false" v-model="logoTitle" @blur="setTimeout(() => isChangeLogoTitle = false, 100);")
-          h1.m-tb-auto(v-else style="flex: 0 0 auto;")
-            | {{logoTitle}}
-        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+          h1.title.m-tb-auto(v-else style="flex: 0 0 auto;")
+            | {{logoTitle}} 기업관리솔루션
+        //b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
         .ib.m-tb-auto.ml
-          a(href="/many-table/front") 메인
+          a.main-menu(href="/many-table/front") 메인
         .ib.m-tb-auto.ml
-          a(href="/many-table/new-table") 테이블 관리
+          a.main-menu(href="/many-table/new-table") 테이블 관리
         .ib.m-tb-auto.ml
-          a(href="/many-table/permission") 권한
+          a.main-menu(href="/many-table/permission") 권한
         .ib.m-tb-auto.ml
-          a(href="/many-table/sign") 결제
+          a.main-menu(href="/many-table/sign") 결제
         .ib.m-tb-auto.ml
-          a(href="/many-table/report") 보고서 출력
+          a.main-menu(href="/many-table/report") 보고서 출력
         .tile
         button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
           span(style="line-height: 1.7em") 로그아웃
+        .tile.is-3
         //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
           .tile
             b-icon.m-tb-auto.mr05(icon="github")
             span(style="line-height: 1.7em") github
 
-      .tile.h25.bg-gray2.bg-lightblue
+      .tile.h25
         .menu-li
           .ib(style="width:3em;")
         .menu-li(v-for="name in Object.keys(select)")
           button.bg-gray2.noborder.table-select(@click="tableName = name" :style="isClickedButtonCSS(name)") {{name}}
-      .tile.p
+      .tile.p.box
         .menu-li
           button.functional.mr(@click="fnFind();functionName='검색';" :style="isClickedFunctionalButtonCSS('검색')") 검색
           button.functional.mr(@click="fnAdd();functionName='추가';" :style="isClickedFunctionalButtonCSS('추가')") 추가
@@ -129,7 +132,7 @@ body
 
 
 
-    main.p0.front
+    main.p0.front.mt2
       b-table(ref="table" :data="_.isNil(selectDo[tableName]) ? select[tableName] : selectDo[tableName]" :td-attrs="(column) => {align: 'right'}" :selected.sync="selectedRow[tableName]" focusable @select=""
         :paginated="true"
         :per-page="10"
@@ -636,7 +639,7 @@ script(type="text/javascript").
         ModalJsonViewerForm
       },
       data: {
-        logoTitle: 'Many Stallings 매니스탈링스',
+        logoTitle: '매니스탈링스',
         chart: null,
         functionName: '조회',
         tableName: '',
@@ -893,15 +896,15 @@ script(type="text/javascript").
         isClickedButtonCSS: function() {
           return (name) => {
             if(this.tableName !== name) return {}
-            return {background: '#fff'}
+            return {background: 'rgb(173, 173, 241)'}
           }
         },
         isClickedFunctionalButtonCSS: function() {
           return (name) => {
             if(name == '숨김취소' && this.isClickedHideButton)
-              return {background: '#fff', color: '#222'}
+              return {background: 'rgb(173, 173, 241)', color: '#222'}
             if(this.functionName !== name) return {}
-            return {background: '#fff', color: '#222'}
+            return {background: 'rgb(173, 173, 241)', color: '#222'}
           }
         },
         isClickedHideButtonCSS: function() {

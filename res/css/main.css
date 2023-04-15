@@ -1,15 +1,21 @@
 html {
-  font-family: NS, BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+  font-family: NS, BlinkMacSystremFont,-apple-systrem,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
 }
 body {
   color: black;
 }
 .b-span {
   display: inline;
-  margin-right: 1em;
+  margin-right: 1rem;
 }
 a {
-  padding: 0.8em;
+  padding: 0.8rem;
+}
+a.main-menu {
+  /*color:#002F89;*/
+  font-size: 1rem;
+  color: #222;
+  font-weight: bold;
 }
 a:hover {
   background: #ddd !important;
@@ -21,13 +27,13 @@ hr {
   margin: 0;
 }
 .lh {
-  line-height: 1.6em;
+  line-height: 1.6rem;
 }
 .message-mobile {
   display: none;
 }
 body, button, input, select, textarea {
-  font-family: NS, BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
+  font-family: NS, BlinkMacSystremFont,-apple-systrem,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif !important;
 }
 section.ctrl-row {
   min-width: 100%;
@@ -55,7 +61,7 @@ table.table-modal:nth-child(2) {
   border-top: 0;
 }
 table.table-modal td, th {
-  line-height: 1.7em;
+  line-height: 1.7rem;
   border: 1px solid rgb(190, 190, 190);
   padding: 3px;
   text-align: center;
@@ -73,18 +79,18 @@ table#help {
   height: 100vh;
   table-layout:fixed;
   word-break:break-all;
-  font-size: 1em;
+  font-size: 1rem;
   border-collapse: collapse;
 }
 table#help td {
-  padding: 1em;
+  padding: 1rem;
   
 }
 table#help td p {
   background: #eee;
-  padding: 0.5em;
+  padding: 0.5rem;
   border-radius: calc(12px - 0.001%);
-  margin: 0.5em;
+  margin: 0.5rem;
   margin-bottom: 0;
   margin-right: 0;
 }
@@ -110,32 +116,41 @@ table#help tr.highlight {
 
 .modal-card-foot {
   padding: 0;
-  height: 3.1em;
+  height: 3.1rem;
   padding-left: 20px;
   padding-right: 20px;
 }
 
 .logo-place {
   width: 100px;
+  color: #002F89;
 }
 .title-area h1::before{
   content: "";
-  padding: 0 0.5em;
-  line-height: 1.5em;
-  border-left: 0.5em solid black;
+  padding: 0 0.5rem;
+  line-height: 1.5rem;
+  border-left: 0.5rem solid black;
+}
+.help-bar {
+  background: #DCE8FE;
+  color: #3E7FFA;  
 }
 .icon > i {
   line-height: normal;  
 }
 h1 {
-  font-size: 1.2em;
+  font-size: 1rem;
   font-weight: bold;
 }
+h1.title {
+  font-size: 1rem;
+  color: #222;
+}
 h2 {
-  font-size: 1.1em;
+  font-size: 1.1rem;
 }
 .fs-content {
-  font-size: 0.8em;
+  font-size: 0.8rem;
 }
 .hin {
   height: inherit;
@@ -144,31 +159,31 @@ h2 {
   height: 100%;
 }
 .h70 {
-  height: 7em;
+  height: 7rem;
 }
 .h50 {
-  height: 5em;
+  height: 5rem;
 }
 .h30 {
-  height: 3em;
+  height: 3rem;
 }
 .h25 {
-  height: 2.5em;
+  height: 2.5rem;
 }
 .h21 {
-  height: 2.1em;
+  height: 2.1rem;
 }
 .h20 {
-  height: 2.0em;
+  height: 2.0rem;
 }
 .h17 {
-  height: 1.7em;
+  height: 1.7rem;
 }
 .h10 {
-  height: 1.0em;
+  height: 1.0rem;
 }
 .w10 {
-  width: 1em;
+  width: 1rem;
 }
 .w768 {
   max-width: 768px;
@@ -176,14 +191,14 @@ h2 {
 header {
 }
 main {
-  padding: 2em 100px;
+  padding: 2rem 100px;
 }
 footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2.5em;
+  height: 2.5rem;
 }
 .ib {
   display: inline-block;
@@ -205,12 +220,6 @@ footer {
 .m-l-auto {
   margin-left: auto;
 }
-.ml-auto {
-  margin-left: auto;
-}
-.mr-auto {
-  margin-right: auto;
-}
 .m-r-auto {
   margin-right: auto;
 }
@@ -229,55 +238,61 @@ footer {
   margin-left: 0;
 }
 .ml {
-  margin-left: 1em;
+  margin-left: 1rem;
 }
 .mr {
-  margin-right: 1em;
+  margin-right: 1rem;
 }
 .mt {
-  margin-top: 1em;
+  margin-top: 1rem;
+}
+.mt2 {
+  margin-top: 2rem;
 }
 .mt5 {
-  margin-top: 5em;
+  margin-top: 5rem;
 }
 .mb {
-  margin-bottom: 1em;
+  margin-bottom: 1rem;
 }
 .ml05 {
-  margin-left: 0.5em;
+  margin-left: 0.5rem;
+}
+.ml2 {
+  margin-left: 2rem;
 }
 .mr05 {
-  margin-right: 0.5em;
+  margin-right: 0.5rem;
 }
 .mb20px {
   margin-bottom: 20px;
 }
 .p {
-  padding: 1em;
+  padding: 1rem;
 }
 .p-report {
-  padding: 2em 3em;
+  padding: 2rem 3rem;
 }
 .ps {
-  padding: 0.3em
+  padding: 0.3rem
 }
 .p0 {
   padding: 0;
 }
 .pl {
-  padding-left: 1em;
+  padding-left: 1rem;
 }
 .pr {
-  padding-right: 1em;
+  padding-right: 1rem;
 }
 .pt {
-  padding-top: 1em;
+  padding-top: 1rem;
 }
 .p-lr {
-  padding: 0 1em;
+  padding: 0 1rem;
 }
 .p02 {
-  padding: 0.2em;
+  padding: 0.2rem;
 }
 .preview {
   border-bottom: 3px outset #696969;
@@ -288,7 +303,7 @@ footer {
 
 }
 .menu-report {
-  padding: 1em 3em;
+  padding: 1rem 3rem;
 }
 .menu-li {
   height: 100%;
@@ -304,7 +319,7 @@ footer {
   background: #eee;
 }
 .bg-gray2 {
-  background: #ddd;
+  background: #dedede;
 }
 .bg-gray3 {
   background: #ccc;
@@ -326,7 +341,7 @@ footer {
   cursor: pointer;
 }
 .h-center {
-  align-items: center;  
+  align-itrems: center;  
 }
 .sb {
   justify-content: space-between
@@ -358,7 +373,7 @@ footer {
 }
 .b-checkbox.checkbox input[type=checkbox]+.check {
   border-radius: 50%;
-  padding: 0.7em;
+  padding: 0.7rem;
 }
 .flex-auto {
   flex: 0 0 auto;
@@ -367,7 +382,7 @@ footer {
 @media screen and (max-width: 900px) {
   main {
     padding: 5vw;
-    margin-bottom: 5em;
+    margin-bottom: 5rem;
   }
   main.front {
     padding: 5vw;

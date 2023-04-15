@@ -1,8 +1,13 @@
 button {
   cursor: pointer;
 }
+button.x {
+   padding-top: 0.25rem;
+   background: transparent;
+   border-width: 0;
+}
 button.flat {
-   padding: 0.8em;
+   padding: 0.8rem;
    background: transparent;
    border-width: 0;
 }
@@ -10,7 +15,7 @@ button.flat:hover {
    background: #ddd;
 }
 button.blue {
-   padding: 0.8em;
+   padding: 0.8rem;
    background: rgb(173, 173, 241);
    border-width: 0;
 }
@@ -18,7 +23,7 @@ button.blue:hover {
    background: rgb(163, 163, 241);
 }
 button.footer {
-  width: 6em;
+  width: 6rem;
   border: none;
 }
 button.footer:nth-of-type(1) {
@@ -30,14 +35,13 @@ button.footer:nth-last-of-type(1) {
 
 
 button.functional {
-   padding: 0.8em;
-   border: 1px solid #363636;
+   padding: 0.8rem;
+   border: 1px solid white;
 
    /*background: transparent;
    border: 2px solid gray;*/
 
-   background: #363636;
-   color: #fff;
+   color: #555;
    border-radius: calc(8px - 0.001%);
 }
 button.functional:hover {
@@ -57,19 +61,19 @@ button.functional.sign:hover, button.functional.sign:active {
 button.functional.sign::before {
    content: "";
    display: block;
-   padding-bottom: calc(10% - 0.5em);
+   padding-bottom: calc(10% - 0.5rem);
 }
 button.functional.sign::after {
    content: "";
    display: block;
-   padding-bottom: calc(10% - 0.5em);
+   padding-bottom: calc(10% - 0.5rem);
 }
 
 
 .winXP-btn {
   border: 1px solid rgb(177, 180, 181);
   border-radius: 3px;
-  padding: 1em 2em;
+  padding: 1rem 2rem;
   background: #f6f6f6;
   background: -moz-linear-gradient(top, #f6f6f6 0%, #ffffff 6%, #fffdfe 12%, #fbf9fa 18%, #f8f7f5 41%, #f7f3f0 47%, #f8f3ef 82%, #e7e0d8 94%, #dad3c9 100%);
   background: -webkit-linear-gradient(top, #f6f6f6 0%, #ffffff 6%, #fffdfe 12%, #fbf9fa 18%, #f8f7f5 41%, #f7f3f0 47%, #f8f3ef 82%, #e7e0d8 94%, #dad3c9 100%);

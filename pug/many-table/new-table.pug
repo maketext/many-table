@@ -25,27 +25,30 @@ body
   #app
     header
       // 공통 헤더
-      .tile.h50.bg-gray1
-        .ib.m-auto.ml.mr.left-blank
-          b-image.logo(src="/img/logo.svg")
-        h1.m-tb-auto(style="flex: 0 0 auto;") Many Stallings 매니스탈링스
-        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+      .tile.h50
+        .tile.is-3
+        .tile.logo-place(style="flex: 0 0 auto;")
+          .ib.m-auto.ml.mr.left-blank
+            b-image.logo(src="/img/logo.svg")
+        button.flat(@click="isChangeLogoTitle = true;setTimeout(() => $refs.changeLogoTitle.focus(), 100);")
+          b-input.m-tb-auto(ref="changeLogoTitle" v-if="isChangeLogoTitle" @keyup.native.enter="isChangeLogoTitle = false" v-model="logoTitle" @blur="setTimeout(() => isChangeLogoTitle = false, 100);")
+          h1.title.m-tb-auto(v-else style="flex: 0 0 auto;")
+            | {{logoTitle}} 기업관리솔루션
+        //b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
         .ib.m-tb-auto.ml
-          a(href="/many-table/front") 메인
+          a.main-menu(href="/many-table/front") 메인
         .ib.m-tb-auto.ml
-          a(href="/many-table/new-table") 테이블 관리
+          a.main-menu(href="/many-table/new-table") 테이블 관리
         .ib.m-tb-auto.ml
-          a(href="/many-table/permission") 권한
+          a.main-menu(href="/many-table/permission") 권한
         .ib.m-tb-auto.ml
-          //a(href="/many-table/rowlog") 사용이력
+          a.main-menu(href="/many-table/sign") 결제
+        .ib.m-tb-auto.ml
+          a.main-menu(href="/many-table/report") 보고서 출력
         .tile
-        //-button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
+        button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
           span(style="line-height: 1.7em") 로그아웃
-        //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
-          .tile
-            b-icon.m-tb-auto.mr05(icon="github")
-            span(style="line-height: 1.7em") github
-      // 끝
+        .tile.is-3
       // 고유 헤더
       .tile.h25
         .menu-li
@@ -54,14 +57,12 @@ body
           button.flat.noborder(@click="fnShowTableMeta(table)") {{table}}
         .menu-li
           button.flat(@click="fnShowAddModal()") 테이블 추가
-      hr
-      .tile.h25
+      .tile.h25.help-bar
         .menu-li 
           .tile
             .ib(style="width:3em;")
             b-icon.m-tb-auto.mr05(icon="face-man-profile")
             span.m-tb-auto.fs-content {{message}}
-      hr
       // 끝
 
     main
@@ -83,7 +84,7 @@ body
                 b-icon.m-auto(icon='drag', size='is-medium', type='is-primary')
           b-table-column(key='0', width="1")
             template(v-slot="props")
-              button(@click="fnDeleteTableColumn(props, props.row)")
+              button.x(@click="fnDeleteTableColumn(props, props.row)")
                 b-icon(icon='close-box-outline', size='is-medium', type='is-primary')
           b-table-column(v-for="(column, index) in columns['meta']", :key='index + 1', :label='column.label', :visible='column.visible')
             template(v-slot="props")
@@ -95,11 +96,11 @@ body
               b-input(v-else-if="column.field == 'label' && Array.isArray(props.row[column.field])" v-model="props.row[column.field][0]") 
               b-input(v-else-if="column.field == 'label'" v-model="props.row[column.field]")
               b-input(v-else-if="column.field == 'func' && props.row['type'] == '수식'" v-model="props.row[column.field]")
-        .tile.h-center.h25
+        .tile.h-center.h25.mt
           .ib
-            button.mr.ml(@click="fnAddTableColumn()") 열 추가
-            button.mr(@click="fnSaveTableMeta()") 저장
-            button(@click="fnDeleteTableMeta()") 테이블 삭제
+            button.functional.mr.ml(@click="fnAddTableColumn()") 열 추가
+            button.functional.mr(@click="fnSaveTableMeta()") 저장
+            button.functional(@click="fnDeleteTableMeta()") 테이블 삭제
     footer.tile.bg-gray1
       .ib.desktop(style="width:3em;")
       .tile
@@ -161,6 +162,8 @@ script(type="text/javascript").
         AddModalForm
       },
       data: {
+        logoTitle: '매니스탈링스',
+        isChangeLogoTitle: false,
         isAddModalActive: false,
         formProps: null,
         tableName: null,
@@ -336,6 +339,11 @@ script(type="text/javascript").
             }
 
           }})
+        },
+        fnLogout: function() {
+          http({uri:"/many-table/logout", method:"delete", param: {}, cb: (res) => {
+            console.log(res)
+          } })
         }
       },
       computed: {

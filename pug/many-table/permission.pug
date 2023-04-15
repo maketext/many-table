@@ -22,45 +22,46 @@ html()
  
 body
   #app
-    header 
+    header
       // 공통 헤더
-      .tile.h50.bg-gray1
-        .ib.m-auto.ml.mr.left-blank
-          b-image.logo(src="/img/logo.svg")
-        h1.m-tb-auto(style="flex: 0 0 auto;") Many Stallings 매니스탈링스
-        b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
+      .tile.h50
+        .tile.is-3
+        .tile.logo-place(style="flex: 0 0 auto;")
+          .ib.m-auto.ml.mr.left-blank
+            b-image.logo(src="/img/logo.svg")
+        button.flat(@click="isChangeLogoTitle = true;setTimeout(() => $refs.changeLogoTitle.focus(), 100);")
+          b-input.m-tb-auto(ref="changeLogoTitle" v-if="isChangeLogoTitle" @keyup.native.enter="isChangeLogoTitle = false" v-model="logoTitle" @blur="setTimeout(() => isChangeLogoTitle = false, 100);")
+          h1.title.m-tb-auto(v-else style="flex: 0 0 auto;")
+            | {{logoTitle}} 기업관리솔루션
+        //b-icon.m-tb-auto.ml(icon="arrow-right" size="is-small")
         .ib.m-tb-auto.ml
-          a(href="/many-table/front") 메인
+          a.main-menu(href="/many-table/front") 메인
         .ib.m-tb-auto.ml
-          a(href="/many-table/new-table") 테이블 관리
+          a.main-menu(href="/many-table/new-table") 테이블 관리
         .ib.m-tb-auto.ml
-          a(href="/many-table/permission") 권한
+          a.main-menu(href="/many-table/permission") 권한
         .ib.m-tb-auto.ml
-          //a(href="/many-table/rowlog") 사용이력
+          a.main-menu(href="/many-table/sign") 결제
+        .ib.m-tb-auto.ml
+          a.main-menu(href="/many-table/report") 보고서 출력
         .tile
-        //-button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
+        button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
           span(style="line-height: 1.7em") 로그아웃
-        //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
-          .tile
-            b-icon.m-tb-auto.mr05(icon="github")
-            span(style="line-height: 1.7em") github
-      // 끝
+        .tile.is-3
       // 고유 헤더
-      .tile.h25
+      //-.tile.h25
         .menu-li
           .ib(style="width:3em;")
         .menu-li
-          button.flat 권한
+          button.functional 권한
         .menu-li
-          button.flat(@click="fnSaveUser") 저장
-      hr
-      .tile.h25
+          button.functional(@click="fnSaveUser") 저장
+      .tile.h25.mt
         .menu-li
           .tile
             .ib(style="width:3em;")
             .menu-li(v-for="table in Object.keys(meta)")
               button.flat(@click="tableName = table") {{table}}
-      hr
       // 끝
     main
       //-b-modal(v-model='isAddModalActive', has-modal-card, trap-focus, :destroy-on-hide='false', aria-role='dialog', aria-label='Control Modal', close-button-aria-label='Close', aria-modal)
@@ -74,6 +75,10 @@ body
                 button.flat(@click="fnSetAllowed(true)") 허용
               .menu-li
                 button.flat(@click="fnSetAllowed(false)") 차단
+              .tile
+              .menu-li
+                button.functional(@click="fnSaveUser") 저장
+
             .tile.h25(v-else)
             p.message-mobile 전체선택시 체크하세요.
             b-table(:data="user" :td-attrs="(column) => {align: 'right'}" 
@@ -153,6 +158,8 @@ script(type="text/javascript").
       components: {
       },
       data: {
+        logoTitle: '매니스탈링스',
+        isChangeLogoTitle: false,
         isControlTileActive: false,
         checkedList: [],
         message: '',
@@ -235,6 +242,11 @@ script(type="text/javascript").
             }
 
           }})
+        },
+        fnLogout: function() {
+          http({uri:"/many-table/logout", method:"delete", param: {}, cb: (res) => {
+            console.log(res)
+          } })
         }
       },
       computed: {

@@ -1,5 +1,6 @@
 const NodeRSA = require("node-rsa")
 const dayjs = require("dayjs")
+const _ = require("lodash")
 
 // 문서 객체
 // 서명 문서 객체, 전자서명 시그니처 배열 = [{username, name, signature}]
@@ -7,8 +8,10 @@ const dayjs = require("dayjs")
 const documents = {
   keyPair: {},
   'MSS-2023-02-17-001': {
+    // member contains signature information
     signValue: [{id: '아이디', name: '이름', sign: '서명값'}],
-    document: {}
+    // document members
+    document: {a:1}
   }
 }
 
@@ -35,84 +38,81 @@ function checkDuplicatedDocumentNo(no)
  */
 function genDocumentNo() 
 {
-  function makeThreeDigit(no) {
-    if(no / 100 > 0) return `${no}`
-    if(no / 10 > 0) return `0${no}`
-    return `00${no}`
-  }
   const prefix = `MSS-${dayjs().format('YYYY-MM-DD')}`
   if(!_.has(documentNoMap, prefix))
     documentNoMap[prefix] = 0
   documentNoMap[prefix]++
-  return `${prefix}-${makeThreeDigit(documentNoMap[prefix])}`
+  return `${prefix}-${documentNoMap[prefix].toString().padStart(3, '0')}`
 }
 
 /**
- * 유저의 개인키 반환
- * @returns Buffer 타입 개인키 객체 
+ * 
+ * @param {Object} document - document object. 문서 객체.
+ * @returns created document's document number. 생성된 문서의 문서번호
  */
-function getMyKeys(username) {
-  const keyPair = documents.keyPair[username]
+function pushDocument(document)
+{
+  const documentNo = genDocumentNo()
+  documents[documentNo] = {
+    signValue: [],
+    document: document
+  }
+  return documentNo
+}
+
+/**
+ * Return the user's signature key. 유저의 서명키 반환.
+ * @param {String} idAndName - id and name (format of 'id/name'). 아이디와 이름 ('아이디/이름' 포멧).
+ * @returns signature key object of Buffer type. Buffer 타입 서명키 객체.
+ */
+function getMyKeys(idAndName) {
+  const keyPair = documents.keyPair[idAndName]
   //return keyPair.exportKey('pkcs1-public-pem') // for Public Key
   return keyPair.exportKey('pkcs1-private-pem')
 }
 
 /**
- * 문서 객체와 서명자 정보가 주어지면 문서에 전자서명한다.
- * 초안 : 서명자 아이디, 서명자 이름이 주어지지 않을 경우 세션에서 가져옴.
- * @param {Object} form - 서명 대상 문서 객체
- * @param {String} username - 서명자 아이디.
- * @param {String} name - 서명자 이름.
- * @returns 서명 성공 여부를 나타내는 오브젝트 {status: true, false 중 하나, reason: '', '중복', '서명 개인키 없음', '문서번호 중복' 중 하나}
+ * When the document number and signer information (id, name) are given, it is signed. 문서 번호와 서명자 정보 (아이디, 이름)가 주어지면 전자서명한다.
+ * @param {String} documentNo - Document Number. 문서번호.
+ * @param {String} idAndName - Signer id and name (format of 'id/name'). 서명자 아이디와 이름 ('아이디/이름' 포멧).
+ * @returns Signature Value Buffer Type. 서명 값 Buffer 타입.
  */
-function doSign (form, username, name) {
-  if(_.isNil(form.form.no) || form.form.no == '')
-    form.form.no = genDocumentNo()
-  if(checkDuplicatedDocumentNo(form.form.no))
-    return {status: false, reason: '문서번호 중복 에러'} // 문서번호 중복 에러
-
-  const signature = sign(form.form, `${username}/${name}`)
-  if(!signature)
-    return {status: false, reason: '서명 개인키 없음 에러'} // 서명 개인키 없음 에러
-
-  if(_.isNil(documents[form.form.no]))
-    documents[form.form.no] = {}
-
-  if(!checkDuplicatedSigner())
+function sign(documentNo, idAndName) {
+  
+  // using node-rsa https://github.com/rzcoder/node-rsa
+  if(!!!documents.keyPair[idAndName])
   {
-    documents[form.form.no].signValue.push({username: username, name: name, signature: signature})
-    documents[form.form.no].document = form.form
-    return {status: true, reason: ''} // 서명 성공
+    // create 512 bit key pair when no key pair (public key, signature key) exists. 서명 개인키가 없는 경우 512 비트 (공개키, 서명키) 쌍 생성.
+    documents.keyPair[idAndName] = new NodeRSA()
+    documents.keyPair[idAndName].generateKeyPair(512)
   }
-  return {status: false, reason: '이미 서명한 서명자 에러'} // 이미 서명한 서명자 에러
-}
-
-/**
- * Development Completes. 개발 완료.
- * @param {JSONObject} sign - title, fingerprints
- */
-function sign(document, username) {
-
-  // Sample Source Code of node-rsa https://github.com/rzcoder/node-rsa
-  if(!!!documents.keyPair[username])
-  {
-    documents.keyPair[username] = new NodeRSA()
-    documents.keyPair[username].generateKeyPair(512)
-  }
-  const keyPair = documents.keyPair[username]
+  const keyPair = documents.keyPair[idAndName]
   //const privateKeyPlainText = key.exportKey('pkcs1-private-pem')
   //const publicKeyPlainText = key.exportKey('pkcs1-public-pem')
 
-  let bufferSigned = keyPair.sign(document)
-  console.log('서명 시그니처', bufferSigned.toString('base64'))
-  console.log('서명 여부', keyPair.verify(document, bufferSigned))
-  return bufferSigned
+  const document = _.has(documents, documentNo) ? documents[documentNo] : undefined
+  if(!!!document)
+    throw Error('No document of document No. exists. 서명 대상 문서번호를 가진 문서가 없습니다.')
+  if(!_.has(document, 'signValue'))
+    document.signValue = []
+
+  const [id, name] = idAndName.split('/')
+  document.signValue.forEach(value => {
+    if(value.id === id) // Duplicated signature value check by 'id' 아이디 기준으로 서명값 중복 검사
+      throw Error('Duplicated signature value. 서명 값 중복')
+  })
+
+  // Make signature
+  const signature = keyPair.sign(document.document)
+
+  document.signValue.push({id: id, name: name, signature: signature})
+  console.log('서명 시그니처', signature.toString('base64'))
+  console.log('서명 여부', keyPair.verify(document.document, signature))
+  return signature
 }
 
 function encrypt()
 {
-  // Sample Source Code of node-rsa https://github.com/rzcoder/node-rsa
-  
   const key = new NodeRSA()
   key.generateKeyPair(512)
   //const privateKeyPlainText = key.exportKey('pkcs1-private-pem')
@@ -123,16 +123,26 @@ function encrypt()
     let EncBuffer = key.encrypt(documnet)
     let res = key.decrypt(EncBuffer, 'json')
 
-    // 잘 동작함.
+    // Well be acted. 잘 동작함.
     // let buffer2 = Buffer.from(EncBuffer.toString('base64'), 'base64')
     // let res2 = key.decrypt(buffer2, 'json')
     // console.log(res2)
-    // 끝.
+    // END. 끝.
     console.log(res)
   }
 
 }
 
 // CONSOLE TEST
-console.log(sign({a:1}, 'abc').toString('base64'))
-console.log(getMyKeys('abc'))
+
+// create document
+const test = {
+  documentNo: null
+}
+test.documentNo = pushDocument({a:1})
+
+// sign the document with (id: abc, name: abc)
+console.log(sign(test.documentNo, 'abc/abc').toString('base64'))
+
+// get signature key of user (id: abc, name: abc)
+console.log(getMyKeys('abc/abc'))

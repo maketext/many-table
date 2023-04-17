@@ -2,9 +2,8 @@ const NodeRSA = require("node-rsa")
 const dayjs = require("dayjs")
 const _ = require("lodash")
 
-// 문서 객체
-// 서명 문서 객체, 전자서명 시그니처 배열 = [{username, name, signature}]
-// keyPair 파라미터: 공개키, 개인키 쌍 보관
+// Documents Object. 문서 객체.
+// keyPair parameter: public and signature key store. keyPair 파라미터: 공개키, 개인키 쌍 보관.
 const documents = {
   keyPair: {},
   'MSS-2023-02-17-001': {
@@ -15,28 +14,28 @@ const documents = {
   }
 }
 
-// 문서번호별 넘버링 중복 방지용 맵 자료구조
+// Map data structure for preventing duplicate numbering by document number. 문서번호별 넘버링 중복 방지용 맵 자료구조.
 const documentNoMap = {
   'MSS-2023-02-17-001': 0,
 }
 
 /**
- * 문서번호 중복 여부 검사
- * @param {String} no - 중복 검사할 문서번호 
- * @returns 문서번호 중복 여부
+ * Checking for duplicate document numbers. 문서번호 중복 여부 검사.
+ * @param {String} no - document number. 중복 검사할 문서번호.
+ * @returns if or not duplicate. 문서번호 중복 여부.
  */
-function checkDuplicatedDocumentNo(no)
+function checkDuplicateDocumentNo(no)
 {
   if(_.has(documents, no)) return true
   return false
 }
 
 /**
- * 문서번호 생성
- * 초안 : 접미어 '-999' 값 초과 값에 대해 문서번호 생성 중단 처리
- * @returns 중복하지 않는 문서번호 출력. 값은 예를 들어 MSS-2020-01-01-001 부터 MSS-2020-01-01-999 까지 가능함.
+ * Generate Document Number. 문서번호 생성.
+ * Draft: Aborting document number generation for values exceeding suffix '-999'. 초안 : 접미어 '-999' 값 초과 값에 대해 문서번호 생성 중단 처리.
+ * @returns Output of non-duplicate document numbers. For example, from MSS-2020-01-01-001 to MSS-2020-01-01-999. 중복하지 않는 문서번호 출력. 값은 예를 들어 MSS-2020-01-01-001 부터 MSS-2020-01-01-999 까지 가능함.
  */
-function genDocumentNo() 
+function generateDocumentNo() 
 {
   const prefix = `MSS-${dayjs().format('YYYY-MM-DD')}`
   if(!_.has(documentNoMap, prefix))
@@ -46,13 +45,13 @@ function genDocumentNo()
 }
 
 /**
- * 
+ * Create Document by auto-generated Document Number. 자동 생성된 문서번호로 문서 생성.
  * @param {Object} document - document object. 문서 객체.
  * @returns created document's document number. 생성된 문서의 문서번호
  */
 function pushDocument(document)
 {
-  const documentNo = genDocumentNo()
+  const documentNo = generateDocumentNo()
   documents[documentNo] = {
     signValue: [],
     document: document
@@ -98,8 +97,8 @@ function sign(documentNo, idAndName) {
 
   const [id, name] = idAndName.split('/')
   document.signValue.forEach(value => {
-    if(value.id === id) // Duplicated signature value check by 'id' 아이디 기준으로 서명값 중복 검사
-      throw Error('Duplicated signature value. 서명 값 중복')
+    if(value.id === id) // Duplicate signature value check by 'id' 아이디 기준으로 서명값 중복 검사
+      throw Error('Duplicate signature value. 서명 값 중복')
   })
 
   // Make signature
@@ -111,6 +110,9 @@ function sign(documentNo, idAndName) {
   return signature
 }
 
+/**
+ * Under developement
+ */
 function encrypt()
 {
   const key = new NodeRSA()

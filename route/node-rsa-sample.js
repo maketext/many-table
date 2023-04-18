@@ -148,3 +148,10 @@ console.log(sign(test.documentNo, 'abc/abc').toString('base64'))
 
 // get signature key of user (id: abc, name: abc)
 console.log(getMyKeys('abc/abc'))
+
+// sign duplicate with (id: abc, name: abc)
+console.log(sign(test.documentNo, 'abc/abc').toString('base64'))
+/*
+  Error: Duplicate signature value. 서명 값 중복
+*/
+

@@ -7,6 +7,7 @@ html()
     script(type='text/javascript', src="/js/vue2611.js")
     script(type='text/javascript', src="/js/buefy.js")
     script(type='text/javascript', src="/js/axios.js")
+    script(type='text/javascript', src="/js/socket-io.js")
     script(type='text/javascript', src="/js/dayjs.js")
     script(type='text/javascript', src="/js/http.js")
     script(type='text/javascript', src="/js/crud.js")
@@ -14,6 +15,7 @@ html()
     script(type='text/javascript', src='/js/toastui-chart.min.js')
     script(type='text/javascript', src='/js/dom-to-image.js')
     script(type='text/javascript', src="/js/modal.js")
+    script(type='text/javascript', src="/js/components.js")
     
     link(rel='stylesheet', href='/css/font.css')
     link(rel='stylesheet', href='/css/main.css')
@@ -84,6 +86,7 @@ body
         button.flat.m-tb-auto.mr(style="flex: 0 0 auto;" @click="fnLogout")
           span(style="line-height: 1.7em") 로그아웃
         .tile.is-3
+          alarm-service
         //-button.flat.m-tb-auto.mr.github(style="flex: 0 0 auto;")
           .tile
             b-icon.m-tb-auto.mr05(icon="github")
@@ -599,7 +602,7 @@ script(type="text/javascript").
           </footer>
         </div>
       `
-  }  
+  }
   const ModalChartForm = {
       props: [],
       methods: {
@@ -636,7 +639,8 @@ script(type="text/javascript").
         ShowModalForm,
         ModalChartForm,
         ModalHelpForm,
-        ModalJsonViewerForm
+        ModalJsonViewerForm,
+        AlarmService,
       },
       data: {
         logoTitle: '매니스탈링스',
@@ -984,9 +988,18 @@ script(type="text/javascript").
                 [this.logoTitle, this.logoImage, this.logoImageExt] = res.result.basic
           }})*/
 
+
         }
         init.bind(this)()
 
+        /* 워커 스레드 실행
+        if(window.Worker) {
+          const worker = new Worker('alarmWorker.js');
+          worker.onmessage = (event) => {
+            console.log(event.data)
+            worker.terminate()
+          }
+        }*/
       }
   })
 

@@ -33,6 +33,37 @@ const isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
 const { generate } = require('randomstring')
 const { URL } = require('url')
 
+
+// for alarm service
+const webSocketServer = require('socket.io').Server
+const webSocketServerInstance = new webSocketServer(8889, {
+  cors: {
+    origin: ["http://localhost:8888", "http://localhost:8889"],
+		pingTimeout: 5000
+  }
+})
+let socket
+webSocketServerInstance.of("/alarm").on('connection', (conn) => {
+	socket = conn
+	console.log('Web Socket client connected.')
+	socket.onAny((event, payload) => {
+		console.log(event, payload)
+		switch(event)
+		{
+			case '핑': 
+			{
+				socket.emit('핑받음', payload)
+				break
+			}
+			case '결제요청': 
+			{
+				break
+			}
+		}
+	})
+})
+// END
+
 dayjs.extend(customParseFormat) // use plugin
 dayjs.extend(isSameOrAfter) // use plugin
 // Create a database
@@ -684,8 +715,37 @@ app.get(['/terms/wordnote'], (req, res, next) => {
 	res.render('terms/wordnote', {})
 	res.locals.canRendered = 1
 })
-// Home page routing ends
-// 홈페이지 라우팅 끝
+app.get(['/bt'], (req, res, next) => {
+	res.render('bt', {})
+	res.locals.canRendered = 1
+})
+app.get(['/circle-ui'], (req, res, next) => {
+	res.render('circle-ui', {})
+	res.locals.canRendered = 1
+})
+// Home page routing ends 홈페이지 라우팅 끝
+
+// For monitoring ram usage 램 사용량 모니터링용 
+app.get(['/top'], (req, res, next) => {
+	res.render('top', {token_: '36a94ed34fddba69bd9f88985b381dc7'})
+	res.locals.canRendered = 1
+	next()
+})
+app.post('/stat53', (req, res, next) => {
+	res.locals.canRendered = 1
+	if(req.body.token_ !== '36a94ed34fddba69bd9f88985b381dc7')
+	{
+		res.sendStatus(400)
+		return next()
+	}
+	const resultList = []
+	const used = process.memoryUsage()
+	resultList.push(`<tr><td>${dayjs().format('HH:mm:ss')}</td><td>heapTotal</td><td>${Math.round(used['heapTotal'] / 1024 / 1024 * 100) / 100} MB</td></tr>`)
+	res.status(200)
+	res.send({ram:resultList.join('')})
+	next()
+})
+// END 끝
 
 
 

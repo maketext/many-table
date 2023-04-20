@@ -38,7 +38,7 @@ const { URL } = require('url')
 const webSocketServer = require('socket.io').Server
 const webSocketServerInstance = new webSocketServer(8889, {
   cors: {
-    origin: ["http://localhost:8888", "http://localhost:8889"],
+    origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
 		pingTimeout: 5000
   }
 })
@@ -342,7 +342,7 @@ async function loginWithRememberMe(req, res, next) {
 		return false
 	}
 	async function getUserFromRememberMeToken() {
-		// There is no Remember Me Cookie Value. 리멤버미 쿠기값 없음.
+		// There is no Remember Me Cookie Value. 리멤버미 쿠키값 없음.
 		if(!req.cookies.remember_me) return undefined
 		// When Cookie validation fails... 쿠키 유효성 검사 실패시...
 		if(!authRememberMeToken(req.cookies.remember_me)) return undefined
@@ -388,6 +388,7 @@ const corsObject = {origin: function(url, cb) {
 app.use(cors(corsObject))
 */
 
+const sessionMemoryStore = new session.MemoryStore()
 const secretList = ['ad6e89cc744a5fa5a23e3d9a4f07e999', '60393f2bcf92a4f87f1ddf6289b331cb', '12982ef42691544736f28d204aa0644d', 'd61752f13a4dc72c45e5c6f45fc0788d', 'dd1568dcb3ee3217ab0ca6664eff09bc', '6be01056887af61b8c8f00ae5a72f01a']
 const activeUsers = {count: 0}
 app.use(compression()) // Removed when using nginx because it can be controlled by reverse proxy. 역방향 프록시에서 제어가능하므로 nginx 사용시 제거.
@@ -396,10 +397,11 @@ app.use(cookieParser()); // Required when using passport-remember-me and corresp
 app.use(bodyParser.urlencoded({ extended: true })) // Important when sending form! form 양식 전송시 중요!
 app.use(bodyParser.json())
 app.use(session({
+	store: sessionMemoryStore,
   secret: secretList,
   resave: false,
   saveUninitialized: false,
-  cookie: { path: '/' }
+  cookie: { path: '/', expires: 1000 * 60 * 15 }
 }))
 app.use(flash())
 app.use((req, res, next) => {
@@ -416,6 +418,15 @@ app.use((req, res, next) => {
 })
 app.use(passport.initialize())
 app.use(passport.session())
+
+// 세션 스토어 메모리 누수 방지를 위해 주기적으로 세션 스토어 배열을 순회함.
+setInterval(() => {
+	sessionMemoryStore.all(function(err, sessionList) {
+		for (let sessionOne of sessionList) {
+			sessionMemoryStore.get(sessionOne, function() {} )
+		}
+	})
+}, 1000 * 60 * 5)
 
 //User information for testing. 테스트용 유저 정보.
 db.put('user', {
@@ -630,6 +641,13 @@ app.get(['/many-table/report', '/many-table/letter', '/many-table/login', '/many
 	res.locals.canRendered = 1
 })
 
+// Static page 2. 스테틱 페이지 2.
+app.get(['/many-factory/main', '/many-factory/bom'], (req, res, next) => {
+	console.log('res.locals.flash', res.locals.flash)
+	res.render(req.path.substring(1), {})
+	res.locals.canRendered = 1
+})
+
 // Starts to the login only page. 로그인 전용 페이지 시작.
 // Cross-cutting Concern to verify login. 로그인 여부 확인용 횡단 관심사.
 app.get(['/many-table/front', '/many-table/new-table', '/many-table/permission', '/many-table/whatisit'], (req, res, next) => {
@@ -638,13 +656,14 @@ app.get(['/many-table/front', '/many-table/new-table', '/many-table/permission',
 	else
 		next()
 })
+
 // Login-only page routing. 로그인 전용 페이지 라우팅.
 app.get(['/many-table/sign'], (req, res, next) => {
 	//Example of a req.user object {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
 	//req.user 객체 예시 {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
 	res.render(req.url.substr(1), {username: req.user.username, name: req.user.name, tableName: Buffer.from(JSON.stringify({'결제': '결제', '직원명부': '직원명부'}), "utf8").toString('base64url')})
-	
 })
+
 app.get(['/many-table/new-table', '/many-table/permission', '/many-table/whatisit'], (req, res, next) => {
 	
 	if(res.locals.flash.length > 0)

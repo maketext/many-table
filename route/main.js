@@ -419,14 +419,18 @@ app.use((req, res, next) => {
 app.use(passport.initialize())
 app.use(passport.session())
 
-// 세션 스토어 메모리 누수 방지를 위해 주기적으로 세션 스토어 배열을 순회함.
+// For session store memory leak prevention periodically, iterate the session store object's keys. (Bug Fix).
+// 세션 스토어 메모리 누수 방지를 위해 주기적으로 세션 스토어 객체의 키를 순회함. (버그 픽스)
 setInterval(() => {
-	sessionMemoryStore.all(function(err, sessionList) {
-		for (let sessionOne of sessionList) {
-			sessionMemoryStore.get(sessionOne, function() {} )
+	sessionMemoryStore.all(function(err, sessionObject) {
+		if(Object.keys(sessionObject).length > 0)
+		{
+			for (let sessionId in sessionObject) {
+				sessionMemoryStore.get(sessionId, function() {} )
+			}
 		}
 	})
-}, 1000 * 60 * 5)
+}, 1000 * 60 * 15)
 
 //User information for testing. 테스트용 유저 정보.
 db.put('user', {

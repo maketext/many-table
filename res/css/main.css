@@ -158,6 +158,9 @@ h2 {
 .h100 {
   height: 100%;
 }
+.w100 {
+  width: 100%;
+}
 .h70 {
   height: 7rem;
 }
@@ -178,6 +181,9 @@ h2 {
 }
 .h17 {
   height: 1.7rem;
+}
+.f17 {
+  flex: 0 0 1.7rem;
 }
 .h10 {
   height: 1.0rem;
@@ -202,6 +208,15 @@ footer {
 }
 .ib {
   display: inline-block;
+}
+.block {
+  display: block;
+}
+.rela {
+  position: relative;
+}
+.abs {
+  position: absolute;
 }
 .ctr {
   vertical-align: middle !important;
@@ -232,7 +247,7 @@ footer {
   margin-bottom: auto;
 }
 .m0 {
-  margin: 0;
+  margin: 0 !important;
 }
 .ml0 {
   margin-left: 0;
@@ -242,6 +257,9 @@ footer {
 }
 .mr {
   margin-right: 1rem;
+}
+.mr2 {
+  margin-right: 2rem;
 }
 .mt {
   margin-top: 1rem;
@@ -254,6 +272,9 @@ footer {
 }
 .mb {
   margin-bottom: 1rem;
+}
+.mb05 {
+  margin-bottom: 0.5rem;
 }
 .ml05 {
   margin-left: 0.5rem;
@@ -282,6 +303,9 @@ footer {
 .pl {
   padding-left: 1rem;
 }
+.pl03 {
+  padding-left: 0.3rem;
+}
 .pr {
   padding-right: 1rem;
 }
@@ -293,6 +317,10 @@ footer {
 }
 .p02 {
   padding: 0.2rem;
+}
+
+.v-center {
+  align-items: center;
 }
 .preview {
   border-bottom: 3px outset #696969;
@@ -341,7 +369,7 @@ footer {
   cursor: pointer;
 }
 .h-center {
-  align-itrems: center;  
+  justify-content: center;  
 }
 .sb {
   justify-content: space-between
@@ -377,6 +405,27 @@ footer {
 }
 .flex-auto {
   flex: 0 0 auto;
+}
+.datetime input {
+  padding: 0;
+  padding-left: 0.75rem;
+  width: 3rem;
+  height: 8rem;
+  font-size: 2rem;
+}
+.b-table .table th .control {
+  width: 100%;
+}
+.pagination-link.is-current {
+  background-color: #576CBC;
+  border-color: #bebebe;
+}
+.pagination-link {
+  border-radius: 50%;
+  border-color: #9BA4B5;
+}
+.table tr.is-selected {
+  background-color: #bebebe;
 }
 
 @media screen and (max-width: 900px) {

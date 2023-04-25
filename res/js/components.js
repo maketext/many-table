@@ -3,15 +3,28 @@ const AlarmService = {
   data() {
     return {
       isShowAlarmModalActive: false,
+      isAlarmMessageActive: false,
       socketManager: null,
       alarmSocket: null,
-
       alarmListCilentSide: []
     }
   },
   template: `
-    <div class="tile h100">
-      <div class="ib m-auto" style="margin-left: 0">
+    <div class="tile h100 rela">
+      <b-message
+        class="abs"
+        style="z-index: 2"
+        auto-close 
+        :progress-bar='true'
+        :duration='3000' 
+        has-icon
+        title="결제요청알림"
+        type="is-dark"
+        v-model="isAlarmMessageActive"
+        aria-close-label="Close message">
+        {{_.last(this.alarmListCilentSide)}}
+      </b-message>
+      <div class="ib m-auto abs" style="margin-left: 0">
         <b-dropdown
           position="is-bottom-left"
           append-to-body
@@ -34,7 +47,7 @@ const AlarmService = {
             paddingless>
             <button class="functional" @click="socketEmit();isShowAlarmModalActive = true;">알람 보기</button>
             <table>
-              <summary>알람 리스트</summary>
+              <summary>알람 리스트 (일반연결 http:// 필요)</summary>
               <thead>
               </thead>
               <tbody>
@@ -57,8 +70,12 @@ const AlarmService = {
         console.log("Web Socket Connection success.")
       })
       this.alarmSocket.on("핑받음", (msg) => { 
-        console.log("핑받음", msg)
         this.addAlarmList(msg)
+        this.isAlarmMessageActive = true
+      })
+      this.alarmSocket.on("결재요청알림", (msg) => { 
+        this.addAlarmList(msg)
+        this.isAlarmMessageActive = true
       })
     },
     socketEmit: function () {
@@ -69,6 +86,7 @@ const AlarmService = {
     },
     socketInit: function () {
       this.socketManager = new io.Manager("http://localhost:8889")
+      //this.socketManager = new io.Manager("http://plusuniv.com:8889")
       this.alarmSocket = this.socketManager.socket("/alarm")
       this.socketManager.open((err) => {
         console.log(err, "Web Socket opened.")

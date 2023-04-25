@@ -21,7 +21,7 @@ html()
     link(rel='stylesheet', href='/css/toastui-chart.min.css')
     
 
-    title 매니테이블 - 결제
+    title 매니테이블 - 결재
     style.
       table.sign {
           width: 100%;
@@ -81,12 +81,12 @@ body
             b-image.logo(src="/img/logo.svg")
           .tile.is-vertical
             .tile.ml.p-lr.title-area
-              h1 결제
+              h1 결재
             .bg-help.ml.p-lr
               h2(:style="msgCSS") {{msg}}
 
       .tile.is-vertical.menu-report
-        h2 작성한 결제서류 (결제서류 수신함으로 변경 예정)
+        h2 작성한 결재서류 (결재서류 수신함으로 변경 예정)
         div
           b-table.pr(ref="table" :data="select[tableNameFront]" :td-attrs="(column) => {align: 'right'}" :selected.sync="selectedRow[tableNameFront]" focusable @select="fnSelectSign"
             :paginated="true"
@@ -128,14 +128,14 @@ body
                     button.blue(@click="onShowJsonViewer(props.row[column.field])") 다중값
 
                   div.h17(v-else) {{ props.row[column.field] }}
-        button.blue.mr.mt.mb(@click="functionName='결제 서류 신규';fnNew()" :style="isClickedFunctionalButtonCSS('결제 서류 신규')") 결제 서류 신규
+        button.blue.mr.mt.mb(@click="functionName='결재 서류 신규';fnNew()" :style="isClickedFunctionalButtonCSS('결재 서류 신규')") 결재 서류 신규
       .tile.pt
         .tile.ml.is-3.is-vertical
 
           .tile.flex-auto
             button.functional.sign.mr(@click="functionName='결재 요청';fnSignRequest();" :style="isClickedFunctionalButtonCSS('결재 요청')") {{signRequestTo['이름'] ? signRequestTo['이름'] + ' 에게' : ''}} 결재 요청
           //-b-select(v-if="functionName == '싸인하기'" placeholder='직원 테이블 변경' @input="fnSignRequest" v-model="signPlace")
-            optgroup(label='결제 구분')
+            optgroup(label='결재 구분')
               option(v-for="(column, index) in ['담당', '부장', '임원']" :value='column') {{column}}
               option(:value='false') 취소
           h2.mt.mb 수신자 선택
@@ -294,7 +294,7 @@ script(type="text/javascript").
 
         name: currentUser.name,
         tableName: tableNameGlobal['직원명부'],
-        tableNameFront: tableNameGlobal['결제'],
+        tableNameFront: tableNameGlobal['결재'],
         columns: [],
         add: {},
         select: {},
@@ -322,7 +322,7 @@ script(type="text/javascript").
         },
         fnFind: function (cmd) {
 
-          //fnFind('결제용')
+          //fnFind('결재용')
           let tableName, selectTableName, thisVar = this
           if(cmd === undefined)
           {
@@ -331,7 +331,7 @@ script(type="text/javascript").
           }
           else 
           {
-            tableName = tableNameGlobal['결제']
+            tableName = tableNameGlobal['결재']
             selectTableName = 'add'
           }
 
@@ -348,28 +348,28 @@ script(type="text/javascript").
 
         // 공통 끝
 
-        // 본인 서명 및 상급자 결제 요청
+        // 본인 서명 및 상급자 결재 요청
         fnSignRequest: function() {
           if(!this.isActive)
           {
-            alert('결제 서류 신규 버튼을 눌러 주십시오.')
+            alert('결재 서류 신규 버튼을 눌러 주십시오.')
             return
           }
           this.isAddActive = true
-          crud.fnAdd('isAddActive', '결제')
+          crud.fnAdd('isAddActive', '결재')
 
           this.msg = '서명이 완료되었습니다.'
           this.msgColor = 'black'
           this.msgBackground = 'white'
 
-          // 초안: 서명 요청, username과 name은 세션 데이터를 활용하므로 요청 파라미터에서 제외
+          // 초안: 서명 요청, username과 name은 세션 데이터를 활용하므로 요청 파라미터에서 재외
         },
         fnSetTableName: function() {
           //
           http({uri:"/api/v2/env", method:"post", param: {'직원명부': this.tableName}, cb: (res) => {
             //res = {code, msg, result}
             if(res.code == 0)
-              this.msg = '결제, 서명에 사용할 직원 테이블 변경 완료.'
+              this.msg = '결재, 서명에 사용할 직원 테이블 변경 완료.'
             window.location.reload(true)
           } })
 
@@ -389,7 +389,7 @@ script(type="text/javascript").
         },
         fnNew: function(cmd) {
           this.isActive = true
-          alert('결제 서류 신규 버튼을 클릭하셨습니다.')
+          alert('결재 서류 신규 버튼을 클릭하셨습니다.')
         }
       },
       computed: {
@@ -429,7 +429,7 @@ script(type="text/javascript").
           if(res.code == 0)
           {
             this.columns = _.cloneDeep(res.result.columns)
-            this.msg = '결제 서류 신규 버튼을 클릭하거나 수신함에서 서류를 선택하십시오.'
+            this.msg = '결재 서류 신규 버튼을 클릭하거나 수신함에서 서류를 선택하십시오.'
           }
         }})
 

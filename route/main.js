@@ -34,11 +34,12 @@ const { generate } = require('randomstring')
 const { URL } = require('url')
 
 
-// for alarm service
+// FOR ALARM SERVICE
 const webSocketServer = require('socket.io').Server
 const webSocketServerInstance = new webSocketServer(8889, {
   cors: {
-    origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
+    origin: ["http://localhost:8888", "http://localhost:8889"],
+    //origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
 		pingTimeout: 5000
   }
 })
@@ -47,7 +48,6 @@ webSocketServerInstance.of("/alarm").on('connection', (conn) => {
 	socket = conn
 	console.log('Web Socket client connected.')
 	socket.onAny((event, payload) => {
-		console.log(event, payload)
 		switch(event)
 		{
 			case '핑': 
@@ -55,13 +55,20 @@ webSocketServerInstance.of("/alarm").on('connection', (conn) => {
 				socket.emit('핑받음', payload)
 				break
 			}
-			case '결제요청': 
+			case '결재요청': 
 			{
 				break
 			}
 		}
 	})
 })
+
+// Sending Alarm Message for Testing, 테스트용 알람 메시지 송신
+setInterval(() => {
+	if(_.isNil(socket)) return
+	socket.emit('결재요청알림', '테스트 메시지입니다. (결재 요청 알림용으로 사용할 예정)')
+
+}, 10000)
 // END
 
 dayjs.extend(customParseFormat) // use plugin
@@ -645,8 +652,9 @@ app.get(['/many-table/report', '/many-table/letter', '/many-table/login', '/many
 	res.locals.canRendered = 1
 })
 
+// For many-factory (Many Factory) solution.
 // Static page 2. 스테틱 페이지 2.
-app.get(['/many-factory/main', '/many-factory/bom'], (req, res, next) => {
+app.get(['/many-factory/main', '/many-factory/bom', '/many-factory/action', '/many-factory/buy', '/many-factory/base-menu', '/many-factory/stock-onsite', '/many-factory/work-state'], (req, res, next) => {
 	console.log('res.locals.flash', res.locals.flash)
 	res.render(req.path.substring(1), {})
 	res.locals.canRendered = 1
@@ -665,7 +673,7 @@ app.get(['/many-table/front', '/many-table/new-table', '/many-table/permission',
 app.get(['/many-table/sign'], (req, res, next) => {
 	//Example of a req.user object {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
 	//req.user 객체 예시 {username: 'admin2', name: '관리자', password: 'apple111apple111', remember_me: false, permission: {}}
-	res.render(req.url.substr(1), {username: req.user.username, name: req.user.name, tableName: Buffer.from(JSON.stringify({'결제': '결제', '직원명부': '직원명부'}), "utf8").toString('base64url')})
+	res.render(req.url.substr(1), {username: req.user.username, name: req.user.name, tableName: Buffer.from(JSON.stringify({'결재': '결재', '직원명부': '직원명부'}), "utf8").toString('base64url')})
 })
 
 app.get(['/many-table/new-table', '/many-table/permission', '/many-table/whatisit'], (req, res, next) => {
@@ -745,6 +753,11 @@ app.get(['/bt'], (req, res, next) => {
 app.get(['/circle-ui'], (req, res, next) => {
 	res.render('circle-ui', {})
 	res.locals.canRendered = 1
+})
+app.get(['/opensource'], (req, res, next) => {
+	res.render('opensource', {})
+	res.locals.canRendered = 1
+	next()
 })
 // Home page routing ends 홈페이지 라우팅 끝
 

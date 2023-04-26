@@ -58,6 +58,9 @@ html()
           margin:auto;
           font-size: 0.5em;
       }
+      #svg-res {
+        height: 0;
+      }
 
 body
   #app
@@ -190,15 +193,17 @@ script(type="text/javascript").
         fnExportPdf: function () {
           const thisVar = this
           this.msg = '양식 영역을 일시적으로 확대 중입니다.'
-          $('#report').css('width', '1587px').css('height', '2243px').css('font-size', '2em')
-          $('#report input').css('font-size', '2em').css('background', 'none').css('border', 'none').css('box-shadow', 'none')
+          $('#report').css('width', '1587px').css('height', '2243px').css('font-size', '2rem')
+          $('#report h1').css('font-size', '3rem')
+          $('#report input').css('font-size', '2rem').css('height', '2.3rem').css('background', 'none').css('border', 'none').css('box-shadow', 'none')
           $('#report button').css('display', 'none')
           const node = document.querySelector('#report')
 
           domtoimage.toJpeg(node, {quality: 1.0})
             .then(function (dataUrl) {
-              $('#report').css('width', '21cm').css('height', '29.7cm').css('font-size', '1em')
-              $('#report input').css('font-size', '1em').css('background', '#EDEED3').css('border', '1px solid dbdbdb').css('box-shadow', 'inset 0 0.0625em 0.125em rgb(10 10 10 / 5%)')
+              $('#report').css('width', '21cm').css('height', '29.7cm').css('font-size', '1rem')
+              $('#report h1').css('font-size', '1.5rem')
+              $('#report input').css('font-size', '1rem').css('height', '1.3rem').css('background', '#EDEED3').css('border', '1px solid dbdbdb').css('box-shadow', 'inset 0 0.0625em 0.125em rgb(10 10 10 / 5%)')
               $('#report button').css('display', 'inline-block')
 
               let img = new Image()

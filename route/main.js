@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-//process.env.NODE_ENV = 'production'
+process.env.NODE_ENV = 'production'
 
 const express = require('express')
 const app = express()
@@ -38,8 +38,8 @@ const { URL } = require('url')
 const webSocketServer = require('socket.io').Server
 const webSocketServerInstance = new webSocketServer(8889, {
   cors: {
-    origin: ["http://localhost:8888", "http://localhost:8889"],
-    //origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
+    //origin: ["http://localhost:8888", "http://localhost:8889"],
+    origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
 		pingTimeout: 5000
   }
 })
@@ -64,11 +64,14 @@ webSocketServerInstance.of("/alarm").on('connection', (conn) => {
 })
 
 // Sending Alarm Message for Testing, 테스트용 알람 메시지 송신
+// Test functionality source code blocked for uploading to web
+/*
 setInterval(() => {
 	if(_.isNil(socket)) return
 	socket.emit('결재요청알림', '테스트 메시지입니다. (결재 요청 알림용으로 사용할 예정)')
 
 }, 10000)
+*/
 // END
 
 dayjs.extend(customParseFormat) // use plugin
@@ -420,7 +423,7 @@ app.use((req, res, next) => {
 		log("응답메시지 전송됨.")
 	})
 	// Where to typing Serialization/Deserialization, components for caching verification. 직렬화/역직렬화, 캐싱확인용 컴포넌트 들어갈 자리.
-	res.append('Cache-Control', 'max-age=5')
+	// res.append('Cache-Control', 'max-age=5') No effect. 효과 없음.
 	next()
 })
 app.use(passport.initialize())
@@ -817,15 +820,14 @@ app.on('event:user_login', () => {
 app.listen(port, async () => {
 	log("HTTP 네트워크 소켓 리스닝 중...")
 
-	const tableNameList = Object.keys(await findSome('columns'))
-	for(const tableName of tableNameList)
-	{
-		//console.log(_.last(_.last(await findSome(`table-${tableName}`))))
-		const lastElement = _.last(_.last(await findSome(`table-${tableName}`)))
-		maxId[tableName] = toInteger(lastElement ? lastElement.id : 0) 
-	}
-	console.log(maxId)
-
+	// const tableNameList = Object.keys(await findSome('columns'))
+	// for(const tableName of tableNameList)
+	// {
+	//	//console.log(_.last(_.last(await findSome(`table-${tableName}`))))
+	// 	const lastElement = _.last(_.last(await findSome(`table-${tableName}`)))
+	// 	maxId[tableName] = toInteger(lastElement ? lastElement.id : 0) 
+	// }
+	// console.log(maxId)
 })
 
 app.set('view engine', 'pug')

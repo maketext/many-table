@@ -2,45 +2,63 @@ script(type="text/x-template" id="report-003")
   #report-staff.p-report.ib(style="width: 21cm;height: 29.7cm;background: white;font-size: 12px;" ref='printarea')
     .tile.is-vertical
       .tile(style="margin-top: 5em;")
-        b-input.staff.ml-auto.mr(v-model="add[0]['사업주']")
-        h1.mr-auto.mr-auto 근로계약서
+        .tile
+        .tile(style="flex: 0 0 calc(12 * 1.5rem)")
+          b-input.staff.title.mr05(v-model="add[0]['사업주']")
+          h1.mr05-auto.mr05-auto 근로계약서
+        .tile
       .tile.mt
-        b-input.staff.mr(v-model="add[0]['사업주']")
-        span.mr (이하 "사업주"라 함)와
-        b-input.staff.sm.mr(v-model="add[0]['근로자']")
+        b-input.staff.md.mr05(v-model="add[0]['사업주']")
+        span.mr05 (이하 "사업주"라 함)와
+        b-input.staff.sm.mr05(v-model="add[0]['근로자']")
         span (이하 "근로자"라 함)은 다음과 같이 근로계약을 체결한다.
       .tile
         .tile.is-vertical
           h2.mt 근로계약기간
           .tile 
-            b-input.staff.sm.mr(v-model="add[0]['년1']")
-            span.mr 년
-            b-input.staff.sm.mr(v-model="add[0]['월1']")
-            span.mr 월
-            b-input.staff.sm.mr(v-model="add[0]['일1']")
-            span.mr 일부터 
-            b-input.staff.sm.mr(v-model="add[0]['년2']")
-            span.mr 년
-            b-input.staff.sm.mr(v-model="add[0]['월2']")
-            span.mr 월
-            b-input.staff.sm.mr(v-model="add[0]['일2']")
+            b-input.staff.sm.mr05(v-model="add[0]['년1']")
+            span.mr05 년
+            b-input.staff.ty.mr05(v-model="add[0]['월1']")
+            span.mr05 월
+            b-input.staff.ty.mr05(v-model="add[0]['일1']")
+            span.mr05 일부터 
+            b-input.staff.sm.mr05(v-model="add[0]['년2']")
+            span.mr05 년
+            b-input.staff.ty.mr05(v-model="add[0]['월2']")
+            span.mr05 월
+            b-input.staff.ty.mr05(v-model="add[0]['일2']")
             span 일까지
           h2.mt 근무장소
           .tile
-            b-input.staff.mr(v-model="add[0]['근무장소']")
+            b-input.staff.mr05(v-model="add[0]['근무장소']")
           h2.mt 소정근로시간
           .tile
-            p 시 분부터 시 분까지 (휴게시간: 시 분~ 시 분)
+            b-input.staff.ty.mr05(v-model="add[0]['시1']")
+            span.mr05 시
+            b-input.staff.ty.mr05(v-model="add[0]['분1']")
+            span.mr05 분부터
+            b-input.staff.ty.mr05(v-model="add[0]['시2']")
+            span.mr05 시
+            b-input.staff.ty.mr05(v-model="add[0]['분2']")
+            span.mr05 분까지 (휴게시간:
+            b-input.staff.ty.mr05(v-model="add[0]['시3']")
+            spam.mr05 시
+            b-input.staff.ty.mr05(v-model="add[0]['분3']")
+            span.mr05 분~
+            b-input.staff.ty.mr05(v-model="add[0]['시4']") 
+            span.mr05 시
+            b-input.staff.ty.mr05(v-model="add[0]['분4']") 
+            span.mr05 분)
           h2.mt 근무일/휴일
-          p 매주 일(또는 매일단위)근무, 주휴일 매주 요일
+          p 매주 월, 화, 수, 목, 금 근무, 매주 토, 일 주휴일
           h2.mt 업무의 내용
           .tile
-            b-input.staff(v-model="add[0]['업무의내용']")
+            b-input.staff.lg(v-model="add[0]['업무의내용']")
 
       .tile 
-        .tile.is-vertical
-          h2.mt.ml 임금
-          table
+        .tile.is-8.is-vertical
+          h2.mt.mb 임금
+          table.m0
             colgroup
               col(style="width:35%;")
               col(style="width:65%;")
@@ -48,33 +66,34 @@ script(type="text/x-template" id="report-003")
               tr 
                 th. 
                   월(일, 시간)급 :
-                td.
-                  원
+                td
+                  b-input.staff.lg(v-model="add[0]['월급']")
               tr 
                 th. 
                   상여금
-                td.
-                  있음( ) 원, 없음 ( )
+                td
+                  b-input.staff.lg(v-model="add[0]['상여금']")
               tr 
                 th. 
                   기타급여(제수당 등)
-                td.
-                  있음 ( ), 없음 ( )            
+                td
+                  b-input.staff.lg(v-model="add[0]['기타급여']")
               tr 
                 th. 
                   임금지급일
-                td.
-                  매월(매주 또는 매일) 일(휴일의 경우는 전일 지급)
+                td
+                  b-input.staff.lg(v-model="add[0]['임금지급일']")
               tr 
                 th. 
                   지급방법
-                td.
-                  근로자에게 직접지급( ), 근로자 명의 예금통장에 입급( )
+                td
+                  b-input.staff.lg(v-model="add[0]['지급방법']")
           h2.mt 연차유급휴가
-          p 연차유급휴가는 근로기준법에서 정하는 바에 따라 부여함
-        .tile.is-vertical
-          h2.mt.ml 사회보험 적용여부
-          table 
+          b-input.staff.lg(v-model="add[0]['연차유급휴가']")
+          p 
+        .tile.is-4.is-vertical
+          h2.mt.ml05 사회보험 적용여부
+          table
             colgroup
               col(style="width:50%;")
               col(style="width:50%;")
@@ -82,22 +101,22 @@ script(type="text/x-template" id="report-003")
               tr
                 th. 
                   고용보험
-                td.
+                td.tac.
                   있음
               tr
-                th. 
+                th.
                   산재보험
-                td.
+                td.tac.
                   있음
               tr
-                th. 
+                th.
                   국민연금
-                td.
+                td.tac.
                   있음
               tr
                 th. 
                   건강보험
-                td.
+                td.tac.
                   있음
       h2.mt 근로계약서 교부
       p 사업주는 근로계약을 체결함과 동시에 본 계약서를 사본하여 근로자의 교부요구와 관계없이 근로자에게 교부함
@@ -133,7 +152,20 @@ script.
 
     },
     created() {
-      this.add = [{'사업주': '매니스탈링스', '근로자': '브라운', '년1': '2023', '월1': '01', '일1': '01', '년2': '2023', '월2': '12', '일2': '31', '근무장소': '원격', '업무의내용': 'IT개발', '시1': '09', '분1': '00', '시2': '18', '분2': '00', '시3': '12', '분3': '00', '시4': '13', '분4': '00', '월급': '3,500,000', '임금지급일': '매월 말일(휴일의 경우는 전일 지급)', '지급방법': '근로자 명의 예금통장에 입금'}]
+      this.add = [{
+        '사업주': '매니스탈링스', 
+        '근로자': '브라운', 
+        '년1': '2023', '월1': '01', '일1': '01', '년2': '2023', '월2': '12', '일2': '31', 
+        '근무장소': '원격', 
+        '업무의내용': 'IT개발', 
+        '시1': '09', '분1': '00', '시2': '18', '분2': '00', '시3': '12', '분3': '00', '시4': '13', '분4': '00', 
+        '월급': '3,500,000',
+        '상여금': '',
+        '기타급여': '',
+        '임금지급일': '매월 말일(휴일의 경우는 전일 지급)', 
+        '지급방법': '근로자 명의 보통예금통장에 입금',
+        '연차유급휴가': '연차유급휴가는 근로기준법에서 정하는 바에 따라 부여함',
+      }]
 
     },
     mounted()

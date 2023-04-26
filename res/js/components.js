@@ -85,8 +85,8 @@ const AlarmService = {
       this.isShowAlarmModalActive = true
     },
     socketInit: function () {
-      this.socketManager = new io.Manager("http://localhost:8889")
-      //this.socketManager = new io.Manager("http://plusuniv.com:8889")
+      //this.socketManager = new io.Manager("http://localhost:8889")
+      this.socketManager = new io.Manager("http://plusuniv.com:8889")
       this.alarmSocket = this.socketManager.socket("/alarm")
       this.socketManager.open((err) => {
         console.log(err, "Web Socket opened.")

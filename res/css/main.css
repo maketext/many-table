@@ -218,6 +218,9 @@ footer {
 .abs {
   position: absolute;
 }
+.tac {
+  text-align: center !important;
+}
 .ctr {
   vertical-align: middle !important;
   text-align: center !important;

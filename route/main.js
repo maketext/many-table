@@ -422,6 +422,7 @@ app.use((req, res, next) => {
 	res.on("finish", function() {
 		log("응답메시지 전송됨.")
 	})
+
 	// Where to typing Serialization/Deserialization, components for caching verification. 직렬화/역직렬화, 캐싱확인용 컴포넌트 들어갈 자리.
 	// res.append('Cache-Control', 'max-age=5') No effect. 효과 없음.
 	next()
@@ -820,14 +821,25 @@ app.on('event:user_login', () => {
 app.listen(port, async () => {
 	log("HTTP 네트워크 소켓 리스닝 중...")
 
-	// const tableNameList = Object.keys(await findSome('columns'))
-	// for(const tableName of tableNameList)
-	// {
-	//	//console.log(_.last(_.last(await findSome(`table-${tableName}`))))
-	// 	const lastElement = _.last(_.last(await findSome(`table-${tableName}`)))
-	// 	maxId[tableName] = toInteger(lastElement ? lastElement.id : 0) 
-	// }
-	// console.log(maxId)
+	// Update Needed.
+	// 업데이트 필요.
+	// When reading a table row, the querySome function is performed,
+	// and the source code of "if(_.isNil(maxId[tableName])) return result" is performed,
+	// If the maxId object is not initialized, it will always read an empty table row, the result: [].
+	// Therefore, maxId initialization is required.
+	// When loading the server instance first time, the database will empty, and in this case, an error occurs when executing the source code of the six lines below.
+	// 테이블 로우 읽기시 querySome 함수를 수행하게 되는데,
+	// "if(_.isNil(maxId[tableName])) return result" 이란 소스코드를 수행하게 되며,
+	// maxId 객체가 초기화되지 않으면 항상 빈 테이블 로우를 읽게 된다.
+	// 따라서 maxId 초기화가 필요하다.
+	// 최초 서버 인스턴스 로딩 시에는 데이터베이스가 비어 있는데 이 경우 아래 6줄의 소스코드 수행시 에러가 발생한다.
+	const tableNameList = Object.keys(await findSome('columns'))
+	for(const tableName of tableNameList)
+	{
+		const lastElement = _.last(_.last(await findSome(`table-${tableName}`)))
+		maxId[tableName] = toInteger(lastElement ? lastElement.id : 0) 
+	}
+	// END
 })
 
 app.set('view engine', 'pug')

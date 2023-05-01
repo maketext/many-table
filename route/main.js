@@ -9,6 +9,8 @@ process.env.NODE_ENV = 'production'
 const express = require('express')
 const app = express()
 const session = require('express-session')
+const ipf = require('express-ipfilter').IpFilter
+const IpDeniedError = require('express-ipfilter').IpDeniedError
 const compression = require('compression')
 const axios = require('axios')
 const path = require('path')
@@ -41,7 +43,15 @@ const webSocketServerInstance = new webSocketServer(8889, {
     //origin: ["http://localhost:8888", "http://localhost:8889"],
     origin: ["http://www.plusuniv.com", "http://plusuniv.com", "http://www.plusuniv.com:8889", "http://plusuniv.com:8889"],
 		pingTimeout: 5000
-  }
+  },
+	allowRequest: (req, callback) => {
+		const incomeIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+		console.log("NEW CONNECTED IP", incomeIp) //Printed as "NEW CONNECTED IP ::ffff:175.115.x.y". So use 'includes' function for matching.
+    const isOriginValid = ENV_GLOBAL['아이피차단']['리스트'].filter(ip => incomeIp.includes(ip)).length === 0
+		if(!isOriginValid)
+			console.log("PORT PROBE DETECT.", incomeIp)
+    callback(null, isOriginValid)
+  }	
 })
 let socket
 webSocketServerInstance.of("/alarm").on('connection', (conn) => {
@@ -84,9 +94,20 @@ const port = 8888
 
 //const maxId = {'테이블1': 100} // 임시 Temporary
 const maxId = {}
-const envMap = {
-	'직원명부': '직원 명부'
+const ENV_GLOBAL = {
+	'직원명부': '직원 명부',
+	'아이피차단': {
+		'파일명': path.join(__dirname, "ips.txt"),
+		'리스트': ['192.168.0.17']
+	},
+	'유저': {
+		'누적': 0,
+		'로그아웃누적': 0
+	}
 }
+ENV_GLOBAL['아이피차단']['리스트'] = fs.readFileSync(ENV_GLOBAL['아이피차단']['파일명'])
+ENV_GLOBAL['아이피차단']['리스트'] = ENV_GLOBAL['아이피차단']['리스트'].toString().split('\r\n')
+
 
 /**
  * @function 
@@ -376,6 +397,7 @@ async function loginWithRememberMe(req, res, next) {
 				// Renew Remember Me Token. 리멤버미 토큰 갱신.
 				issueTokenWhen(req.cookies.remember_me === 'un', req, res, next)
 				req.user.remember_me = req.cookies.remember_me
+				app.emit('event:user_login')
 			}
 		})
 	}
@@ -400,9 +422,50 @@ app.use(cors(corsObject))
 
 const sessionMemoryStore = new session.MemoryStore()
 const secretList = ['ad6e89cc744a5fa5a23e3d9a4f07e999', '60393f2bcf92a4f87f1ddf6289b331cb', '12982ef42691544736f28d204aa0644d', 'd61752f13a4dc72c45e5c6f45fc0788d', 'dd1568dcb3ee3217ab0ca6664eff09bc', '6be01056887af61b8c8f00ae5a72f01a']
-const activeUsers = {count: 0}
 app.use(compression()) // Removed when using nginx because it can be controlled by reverse proxy. 역방향 프록시에서 제어가능하므로 nginx 사용시 제거.
 app.use(express.static(path.join(__dirname, '..', 'res')))
+
+app.use(ipf(ENV_GLOBAL['아이피차단']['리스트'], {mode: 'deny'}))
+
+app.use((req, res, next) => {
+	let newPath = req.path.split('/')
+	newPath = newPath[newPath.length - 1]
+	let uriList1 = ['bag2', 'google42020a6b379e14f0', 'HNAP1', 'pools', 'Portal0000', 'main', 'lec', 'nmaplowercheck1640592326', 'phpmyadmin', 'default', 'server-status', 'xmlrpc', 'nmaplowercheck1640455815', '__Additional', 'info', 'app-ads', 'ㅡ', 'wp-content', 'start', 'nmaplowercheck1640421360', 'hCiH', 'text4041640491067', 'phpinfo', 'readme', 'menu', 'hudson', 'home', 'ads', 'text4041640614198', 'xu69', 'setup', 'config', 'status']
+	let uriList2 = ['HNAP1', 'phpversion', 'digg', 'echo', 'docs', 'web-console', 'asdf', 'doku', 'text4041638704623', 'stylesheet', 'wcm', 'index', 'changelog', 'Login', 'hudson', 'issmall', 'Telerik.Web.UI.WebResource', 'bbs', 'install', 'php-info', '404', 'reset', 'status', 'archiver', 'Help', 'pinfo', 'rss', 'sensorlist', 'sidekiq', 'ReportServer', 'system_api', 'cc', 'c', 'i', 'plugin', 'README', 'owa', 'php', 'deptWebsiteAction', 'config', 'infos', 'kindeditor', 'errr', 'php_info', 'fuN3', 'text4041638713898', 'extern', 'blog', 'docker-compose', 'xmlrpc', 'Search', 'app-ads', 'info', 'licence', 'CHANGELOG', 'text4041639046216', 'fckeditor', 'test',, 'phpinfo', 'list', 'Wq_StranJF', 'ads', 'feed', 'test_404_page', 'shell', 'weblog', 'kindeditor-min', 'admin', 'wp-cron', 'phpmyadmin', 'currentsetting', 'solr', 'main.dart', 'text4041638717472', 'console', 'temp', 'admin-console', 'bencandy', 'wp-content', 'Error', 'readme', 'forum', 'old_phpinfo', 'test_for_404', 'linusadmin-phpinfo', 'setup', 'time', 'Editor', 'infophp', 'webfig']
+	let uriList3 = ["php", "asp", "actuator", "boaform", "api", "xss", "?q=", "webmail", "cgi", "microsoft", "Autodiscover", "ignition", "plugins", "jsonws", "wp", "jspxcms", "solr", "console", "GponForm" , "app", "public", "owa", "ecp", "exchange", "trace", "ckeditor", "FCK", "tpl", "mail", "xslt", "README", "Wq_StranJF", "cron", "log"]
+	let ctype = "text/html"
+	if(!newPath)
+	{
+		next()
+		return
+	}
+	if(uriList1.join().includes(newPath))
+	{
+		console.log("URL 키워드 차단 1.")
+		res.writeHead(404, {"Content-Type": ctype})
+		res.end()
+		return
+	}
+	else if(uriList2.join().includes(newPath))
+	{
+		console.log("URL 키워드 차단 2.")
+		res.writeHead(404, {"Content-Type": ctype})
+		res.end()
+		return
+	}
+	else if(uriList3.join().includes(newPath))
+	{
+		console.log("URL 키워드 차단 3.")
+		res.writeHead(404, {"Content-Type": ctype})
+		res.end()
+		return
+	}
+	res.on("finish", function() {
+	})
+	// 직렬화/역직렬화, 캐싱확인용 컴포넌트 들어갈 자리.
+	next()
+})
+
 app.use(cookieParser()); // Required when using passport-remember-me and corresponds to "Cannot read properties of undefined (reading 'remember_me') error. "Cannot read properties of undefined (reading 'remember_me')" 에러에 대응하며 passport-remember-me 사용시 필수.
 app.use(bodyParser.urlencoded({ extended: true })) // Important when sending form! form 양식 전송시 중요!
 app.use(bodyParser.json())
@@ -780,7 +843,19 @@ app.post('/stat53', (req, res, next) => {
 	}
 	const resultList = []
 	const used = process.memoryUsage()
-	resultList.push(`<tr><td>${dayjs().format('HH:mm:ss')}</td><td>heapTotal</td><td>${Math.round(used['heapTotal'] / 1024 / 1024 * 100) / 100} MB</td></tr>`)
+	const time = dayjs().format('HH:mm:ss')
+	resultList.push(`
+		<tr>
+			<td>${time}</td>
+			<td>heapTotal</td>
+			<td>${Math.round(used['heapTotal'] / 1024 / 1024 * 100) / 100} MB</td>
+		</tr>
+		<tr>
+			<td>${time}</td>
+			<td>session</td>
+			<td>${ENV_GLOBAL['유저']['누적']}</td>
+		</tr>
+	`)
 	res.status(200)
 	res.send({ram:resultList.join('')})
 	next()
@@ -809,17 +884,18 @@ app.all('/many-table/logout', async (req, res, next) => {
 			next(err)
 		else
 		{
+			console.log("세션 로그아웃수 증가", ++ENV_GLOBAL['유저']['로그아웃누적'])
 			res.send({code: 0})
 			next()
 		}
 	})
 })
 app.on('event:user_login', () => {
-	console.log("세션 로그인", ++activeUsers.count)
+	console.log("세션 로그인수 증가", ++ENV_GLOBAL['유저']['누적'])
 })
 
 app.listen(port, async () => {
-	log("HTTP 네트워크 소켓 리스닝 중...")
+	console.log("HTTP 네트워크 소켓 리스닝 중...")
 
 	// Update Needed.
 	// 업데이트 필요.
@@ -1188,8 +1264,8 @@ app.post('/api/v2/user-list/', async (req, res, next) => {
 		.finally(() => next())
 })
 app.post('/api/v2/env', async (req, res, next) => {
-	_.assign(envMap, req.body)
-	console.log('envMap', envMap)
+	_.assign(ENV_GLOBAL, req.body)
+	console.log('ENV_GLOBAL', ENV_GLOBAL)
 	res.send({code: 0, msg: '쓰기 성공'})
 	next()
 })
@@ -1303,6 +1379,8 @@ app.use(function(req, res, next) {
 		res.locals.canRendered = 1
 	else if(req.method != 'GET' && req.url.startsWith('/api/v2/'))
 		res.locals.canRendered = 1
+	else if(req.method == 'DELETE') // for Logout situation.
+		res.locals.canRendered = 1
 
 	if(res.locals.canRendered === undefined)
 	{
@@ -1313,6 +1391,14 @@ app.use(function(req, res, next) {
 		next()
 })
 app.use((err, req, res, next) => {
-	//console.log(err.message)
-	res.status(404).end()
+	if(err)
+		console.log(err)
+	if (err instanceof IpDeniedError)
+		res.sendStatus(401)
+	else
+	{
+		res.status(200)
+		res.render('many-table/error', {})
+	}
+	next()
 })

@@ -94,7 +94,7 @@ Using TOAST UI - NHN Cloud Open Source. ([https://ui.toast.com/](https://ui.toas
 Many Table's License is equal to MIT License.
 Many Table's license applies to all parts of Many Table that are not externally maintained libraries.
 
-Copyright (c) 2022-2023, Many Stallings.
+Copyright (c) 2022-2023, Changho Lee.
 
 ### Externally maintained Libraries
 

@@ -9,8 +9,8 @@ process.env.NODE_ENV = 'production'
 const express = require('express')
 const app = express()
 const session = require('express-session')
-const ipf = require('express-ipfilter').IpFilter
-const IpDeniedError = require('express-ipfilter').IpDeniedError
+//const ipf = require('express-ipfilter').IpFilter
+//const IpDeniedError = require('express-ipfilter').IpDeniedError
 const compression = require('compression')
 const axios = require('axios')
 const path = require('path')
@@ -35,6 +35,28 @@ const isSameOrAfter = require('dayjs/plugin/isSameOrAfter')
 const { generate } = require('randomstring')
 const { URL } = require('url')
 
+// Util Functions
+function IpFilter(req, res, next) {
+	const clientIp = req.socket.remoteAddress
+	console.log("NEW CONNECTED IP", clientIp) //Printed as "NEW CONNECTED IP ::ffff:175.115.x.y". So use 'includes' function for matching.
+	const isOriginValid = clientIp ? ENV_GLOBAL['아이피차단']['리스트'].filter(ip => clientIp.includes(ip)).length === 0 : false
+	if(!isOriginValid)
+	{
+		if(res)
+			console.log("80 PORT PROBE DETECT.", clientIp)
+		else
+			console.log("WEBSOCKET PORT PROBE DETECT.", clientIp)
+		if(res)
+			res.sendStatus(400)
+	}
+	else 
+	{
+		console.log("IP Filter condition allowed.", clientIp)
+		if(res === null) // for WebSocket case.
+			next(null, true)
+		else next() // for Express.js case.
+	}
+}
 
 // FOR ALARM SERVICE
 const webSocketServer = require('socket.io').Server
@@ -45,12 +67,7 @@ const webSocketServerInstance = new webSocketServer(8889, {
 		pingTimeout: 5000
   },
 	allowRequest: (req, callback) => {
-		const incomeIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress
-		console.log("NEW CONNECTED IP", incomeIp) //Printed as "NEW CONNECTED IP ::ffff:175.115.x.y". So use 'includes' function for matching.
-    const isOriginValid = ENV_GLOBAL['아이피차단']['리스트'].filter(ip => incomeIp.includes(ip)).length === 0
-		if(!isOriginValid)
-			console.log("PORT PROBE DETECT.", incomeIp)
-    callback(null, isOriginValid)
+		IpFilter(req, null, callback)
   }	
 })
 let socket
@@ -422,10 +439,11 @@ app.use(cors(corsObject))
 
 const sessionMemoryStore = new session.MemoryStore()
 const secretList = ['ad6e89cc744a5fa5a23e3d9a4f07e999', '60393f2bcf92a4f87f1ddf6289b331cb', '12982ef42691544736f28d204aa0644d', 'd61752f13a4dc72c45e5c6f45fc0788d', 'dd1568dcb3ee3217ab0ca6664eff09bc', '6be01056887af61b8c8f00ae5a72f01a']
+//app.set('trust proxy', 'loopback')
 app.use(compression()) // Removed when using nginx because it can be controlled by reverse proxy. 역방향 프록시에서 제어가능하므로 nginx 사용시 제거.
 app.use(express.static(path.join(__dirname, '..', 'res')))
 
-app.use(ipf(ENV_GLOBAL['아이피차단']['리스트'], {mode: 'deny'}))
+//app.use(IpFilter) // Doesn't work becasue req.socket.remoteAddr always has '::ffff:127.0.0.1' in pm2 and node.js standalone environment.
 
 app.use((req, res, next) => {
 	let newPath = req.path.split('/')
@@ -477,6 +495,8 @@ app.use(session({
   cookie: { path: '/', expires: 1000 * 60 * 15 }
 }))
 app.use(flash())
+app.set('view engine', 'pug')
+app.set('views', path.join(__dirname,'..', 'pug'))
 app.use((req, res, next) => {
 	//res.locals.flash = []
 
@@ -918,8 +938,6 @@ app.listen(port, async () => {
 	// END
 })
 
-app.set('view engine', 'pug')
-app.set('views', path.join(__dirname,'..', 'pug'))
 
 function getCount(id) {
 	return id / 5000 + 1
@@ -1374,8 +1392,8 @@ app.get('/img/:img', (req, res, next) => {
 		
 	})
 })
-app.use(function(req, res, next) {
-	if(req.url == '/favicon.ico') 
+app.all('*', (req, res, next) => {
+	if(req.url == '/favicon.ico')
 		res.locals.canRendered = 1
 	else if(req.method != 'GET' && req.url.startsWith('/api/v2/'))
 		res.locals.canRendered = 1
@@ -1383,22 +1401,12 @@ app.use(function(req, res, next) {
 		res.locals.canRendered = 1
 
 	if(res.locals.canRendered === undefined)
-	{
-		var err = new Error('Page Not Found')
-		next(err)
-	}
-	else
-		next()
+		res.render('many-table/error', {})
+	next()
 })
 app.use((err, req, res, next) => {
-	if(err)
-		console.log(err)
-	if (err instanceof IpDeniedError)
-		res.sendStatus(401)
-	else
-	{
-		res.status(200)
-		res.render('many-table/error', {})
-	}
+	res.status(404)
+	console.log(err)
+	res.render('many-table/error', {})
 	next()
 })

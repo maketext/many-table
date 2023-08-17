@@ -45,7 +45,8 @@ The login account information is determined during the test phase.
 [https://plusuniv.com/many-table/login](https://plusuniv.com/many-table/login)
 
 ID: admin2
-PW: apple111apple111
+PW: 1
+Must check the '100 일간' radio option. Session logout will be performed after 15 min. But remember-me token will be remained in browser connecting. You can Ctrl+Shift+Del on browser and delete all the cookies selective.
 
 ## Create Table Sheet
 ![image02](https://user-images.githubusercontent.com/32004044/228518265-b226d346-24cf-438e-be0a-fb43ee9657a3.png)

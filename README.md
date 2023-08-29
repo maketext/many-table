@@ -44,8 +44,8 @@ The login account information is determined during the test phase.
 
 [https://plusuniv.com/many-table/login](https://plusuniv.com/many-table/login)
 
-ID: admin2
-PW: 1
+ID: admin2\
+PW: 1\
 Must check the radio option. Session logout will be performed after 15 min. But remember-me token will be remained in browser connecting. You can Ctrl+Shift+Del on browser and delete all the cookies.
 
 ## Main
@@ -55,18 +55,18 @@ Must check the radio option. Session logout will be performed after 15 min. But 
 ![image03](https://plusuniv.com/img/link/Frame5.png)
 
 ## Search Data
-You can search with all the columns, any combined ones
+You can search with all the columns, any combined ones__
 ![image04](https://plusuniv.com/img/link/Frame2.png)
 
 ## Input Mutliline Data
-![image05](https://plusuniv.com/img/link/Frame2.png)
+![image05](https://plusuniv.com/img/link/Frame3.png)
 
 ## Export Report Form
-Transform row data as document PDF.
+Transform row data as document PDF.\
 ![image06](https://plusuniv.com/img/link/Frame8.png)
 
 ## Report
-Complete the form directly against the form.
+Complete the form directly against the form.\
 ![image07](https://user-images.githubusercontent.com/32004044/228518350-5320a3c7-39e8-4b1f-96bb-ad2ebb4fe8f1.png)
 
 ## Approving a report
